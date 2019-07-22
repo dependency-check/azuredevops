@@ -83,7 +83,7 @@ try {
 
     # additionalArguments
     if([string]::IsNullOrEmpty($additionalArguments) -eq $false ) {
-        $arguments = $arguments + " $suppressionPath"
+        $arguments = $arguments + " $additionalArguments"
     }
 
     #Get dependency check script path
@@ -96,6 +96,7 @@ try {
         
         #Console output for the log file
         Write-Host -Verbose "Invoking Dependency Check..."
+        Write-Host -Verbose "Path: $depCheckPath"
         Write-Host -Verbose "Arguments: $arguments"
 
         # Run the scan
