@@ -1,0 +1,97 @@
+{
+  "manifestVersion": 1,
+  "id": "DependencyCheck-AzureDevOps",
+  "version": "5.1.1.000",
+  "name": "OWASP Dependency Check",
+  "public": true,
+  "scopes": [
+        "vso.build_execute"
+    ],
+  "description": "Dependency Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project's dependencies.",
+  "publisher": "DependencyCheck",
+  "galleryFlags": [
+    "Public"
+  ],
+  "icons": {
+    "default": "images/logo-128x128.png"
+  },
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "demands": [
+    "api-version/3.0"
+  ],
+  "tags": [
+    "Software Composition Analysis",
+    "Vulnerability Detection",
+    "Security",
+    "OWASP",
+    "CWE",
+    "A9",
+    "Using Components with Known Vulnerabilities",
+    "Supply Chain Security"
+  ],
+  "categories": [
+    "Azure Pipelines"
+  ],
+  "screenshots": [
+    {
+      "path": "screenshots/report.png"
+    }
+  ],
+  "content": {
+    "details": {
+      "path": "overview.md"
+    },
+    "license": {
+      "path": "license.md"
+    }
+  },
+  "links": {
+    "getstarted": {
+      "uri": "https://jeremylong.github.io/DependencyCheck/index.html"
+    },
+    "support": {
+      "uri": "https://github.com/jeremylong/DependencyCheck"
+    }
+  },
+  "branding": {
+    "color": "rgb(247, 141, 10)",
+    "theme": "light"
+  },
+    "files": [
+        {
+            "path": "images",
+            "addressable": true          
+        },
+        {
+            "path": "dist",
+            "addressable": true,
+            "packagePath": "scripts"
+        },
+        {
+            "path": "src/Tasks",
+            "addressable": true,
+            "packagePath": "Tasks"
+        },                  
+        {
+            "path": "node_modules/vss-web-extension-sdk/lib",
+            "addressable": true,
+            "packagePath": "lib"
+        }        
+  ],
+  "contributions": [
+    {
+      "id": "dependency-check-build-task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "type": "ms.vss-distributed-task.task",
+      "properties": {
+        "name": "Tasks/dependency-check-build-task"
+      }
+    }
+  ]
+}

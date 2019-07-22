@@ -1,0 +1,14 @@
+{
+  "name": "dependency-check-build-task",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dependency-check-build-task.ps1",
+  "scripts": {
+    "install-libs": "npm install"
+  },
+  "author": "Dependency Check",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "vsts-task-lib": "^2.6.1"
+  }
+}
