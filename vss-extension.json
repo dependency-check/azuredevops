@@ -1,17 +1,25 @@
 {
   "manifestVersion": 1,
-  "id": "DependencyCheck-AzureDevOps",
-  "version": "5.1.1.000",
+  "id": "azuredevops",
+  "version": "5.2.0.000",
   "name": "OWASP Dependency Check",
   "public": true,
   "scopes": [
-        "vso.build_execute"
-    ],
+    "vso.build_execute"
+  ],
   "description": "Dependency Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project's dependencies.",
-  "publisher": "DependencyCheck",
+  "publisher": "dependency-check",
   "galleryFlags": [
     "Public"
   ],
+  "licensing": {
+    "overrides": [
+      {
+        "id": "dependency-check-build-task",
+        "behavior": " AlwaysInclude"
+      }
+    ]
+  },
   "icons": {
     "default": "images/logo-128x128.png"
   },
@@ -61,26 +69,26 @@
     "color": "rgb(247, 141, 10)",
     "theme": "light"
   },
-    "files": [
-        {
-            "path": "images",
-            "addressable": true          
-        },
-        {
-            "path": "dist",
-            "addressable": true,
-            "packagePath": "scripts"
-        },
-        {
-            "path": "src/Tasks",
-            "addressable": true,
-            "packagePath": "Tasks"
-        },                  
-        {
-            "path": "node_modules/vss-web-extension-sdk/lib",
-            "addressable": true,
-            "packagePath": "lib"
-        }        
+  "files": [
+    {
+      "path": "images",
+      "addressable": true
+    },
+    {
+      "path": "dist",
+      "addressable": true,
+      "packagePath": "scripts"
+    },
+    {
+      "path": "src/Tasks",
+      "addressable": true,
+      "packagePath": "Tasks"
+    },
+    {
+      "path": "node_modules/vss-web-extension-sdk/lib",
+      "addressable": true,
+      "packagePath": "lib"
+    }
   ],
   "contributions": [
     {
