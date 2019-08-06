@@ -11,8 +11,8 @@ To release a new version, start by opening the *src/Tasks/dependency-check-build
 ```
 "version": {
     "Major": 5,
-    "Minor": 1,
-    "Patch": 1000
+    "Minor": 2,
+    "Patch": 1001
 },
 ```
 

@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
-  "id": "azuredevops-dev",
-  "version": "5.2.0.000",
+  "id": "dependencycheck-dev",
+  "version": "5.2.1.001",
   "name": "OWASP Dependency Check - DEV",
   "public": true,
   "scopes": [
@@ -10,7 +10,6 @@
   "description": "Dependency Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project's dependencies.",
   "publisher": "dependency-check",
   "galleryFlags": [
-    "Public",
     "Preview"
   ],
   "licensing": {
