@@ -34,6 +34,7 @@ try {
     $suppressionPath = Get-VstsInput -Name 'suppressionPath' -Default ''
     $enableExperimental = Get-VstsInput -Name 'enableExperimental' -Require -AsBool
     $enableRetired = Get-VstsInput -Name 'enableRetired' -Require -AsBool
+    $enableVerbose = Get-VstsInput -Name 'enableVerbose' -Require -AsBool
     $additionalArguments = Get-VstsInput -Name 'additionalArguments' -Default ''
 
     #Trim the strings
@@ -43,11 +44,22 @@ try {
     $suppressionPath = $suppressionPath.Trim();
     $additionalArguments = $additionalArguments.Trim();
 
+    #Create reports directory
+    $testDirectory = $Env:COMMON_TESTRESULTSDIRECTORY
+    $reportsDirectory = "$testDirectory\dependency-check"
+
+    # Check if report directory does not exist
+    if(!(Test-Path -Path $reportsDirectory))
+    {
+        Write-Host "Creating dependency check test results directory at $reportsDirectory"
+        New-Item $reportsDirectory -Type Directory
+    }
+
     # Default args
-    $arguments = "--project ""$projectName"" --scan $scanPath --out ./dependency-check" 
+    $arguments = "--project ""$projectName"" --scan ""$scanPath"" --out ""$reportsDirectory"""
 
     # Exclude switch
-    if([string]::IsNullOrEmpty($excludePath) -eq $false ) {
+    if ($Env:BUILD_REPOSITORY_LOCALPATH -ne $excludePath){
         $arguments = $arguments + " --exclude ""$excludePath"""
     }
     
@@ -67,7 +79,7 @@ try {
     }
 
     # Suppression switch
-    if([string]::IsNullOrEmpty($suppressionPath) -eq $false ) {
+    if ($Env:BUILD_REPOSITORY_LOCALPATH -ne $suppressionPath){
         $arguments = $arguments + " --suppression ""$suppressionPath"""
     }
 
@@ -81,9 +93,14 @@ try {
         $arguments = $arguments + " --enableRetired"
     }
 
+    #Set log switch if requested
+    if($enableVerbose -eq $true) {
+        $arguments = $arguments + " --log ""$reportsDirectory\log"""
+    }
+
     # additionalArguments
     if([string]::IsNullOrEmpty($additionalArguments) -eq $false ) {
-        $arguments = $arguments + " $additionalArguments"
+        $arguments = $arguments + " " + $additionalArguments
     }
 
     #Get dependency check script path
@@ -91,7 +108,9 @@ try {
     $depCheckScripts = "dependency-check/bin"
     $depCheckPath = $depCheckScripts | Resolve-Path | Join-Path -ChildPath "$depCheck"
     
+    #Default status to pass, change evaling the exit code below
     $failed = $false
+
     if (Test-Path $depCheckPath -PathType Leaf) {
         
         #Console output for the log file
@@ -100,46 +119,51 @@ try {
         Write-Host -Verbose "Arguments: $arguments"
 
         # Run the scan
-        #$exitcode = (Start-Process -FilePath $depCheckPath -ArgumentList $arguments -PassThru -Wait -NoNewWindow).ExitCode
-        
+        $exitcode = (Start-Process -FilePath $depCheckPath -ArgumentList $arguments -PassThru -Wait -NoNewWindow).ExitCode
+        Write-Host -Verbose "Dependency Check completed with exit code $exitcode."
+        Write-Host -Verbose "Dependency check reports:"
+        Get-ChildItem $reportsDirectory
+
         # Process based on exit code
-        #$message = "Dependency Check exited with an error code."
-        #$failed = $false
-        #$processArtifacts = $true
+        $message = "Dependency Check exited with an error code."
+        $processArtifacts = $true
 
         # Error severity / thresholds. Need to fail task, but still process artifacts
-        #if ($exitcode -eq 4 -or $exitcode -eq 6 -or $exitcode -eq 7 -or $exitcode -eq 8) {
-        #    $failed = $true
-        #    $processArtifacts = $true
-        #    $message = "CVSS threshold violation."
-        #}
-        #elseif ($exitcode -ne 0) {
-        #    $processArtifacts = $false
-        #    $failed = $true
-        #}
+        if ($exitcode -ne 0) {
+            
+            if($resultCVSSValue -eq $true -and $exitcode -eq 1) {
+                $failed = $true
+                $processArtifacts = $true
+                $message = "CVSS threshold violation."
+            }
+            else {
+                $processArtifacts = $false
+                $failed = $true
+            }
+        }
         
         # Process scan artifacts is required
-        #if ($processArtifacts -eq $true) {
-        #    $outputTypes = $scanResultsFormat.Split(",")
-
-            #Write-Debug "Attachments:"
-            #foreach($outputType in $outputTypes)
-            #{
-            #    $scanresultspath = "$outputFilename.$outputType"
-            #    $scanresultfilename = (Get-Item $scanresultspath ).Name
-            #    $scanresultfilename = $scanresultfilename.Replace(".", "%2E")
-            #    Write-Debug "attachment name: $scanresultfilename"    
-            #    Write-Debug "attachment path: $scanresultspath"  
-            #    Write-Debug "attachment type: $outputType"  
-            #    Write-Host "##vso[task.addattachment type=dependencycheck-artifact;name=$scanresultfilename;]$scanresultspath"
-            #    Write-Host "##vso[artifact.upload containerfolder=dependency-check;artifactname=Dependency Check;]$scanresultspath"
-            #}   
+        if ($processArtifacts -eq $true) {
+            
+            Write-Debug "Attachments:"
+            Get-ChildItem -Path $reportsDirectory -Recurse -Force | 
+            Foreach-Object {
+                $filePath = $_.FullName
+                $fileName = $_.Name.Replace(".", "%2E")
+                Write-Debug "Attachment name: $fileName"    
+                Write-Debug "Attachment path: $filePath"  
+                Write-Debug "Attachment type: $_.Extension"  
+                Write-Host "##vso[task.addattachment type=dependencycheck-artifact;name=$fileName;]$filePath"
+                Write-Host "##vso[artifact.upload containerfolder=dependency-check;artifactname=Dependency Check;]$filePath"
+            }   
             
             #upload logs
-            #Get-ChildItem -Path *.log -Recurse -Force | 
-            #Foreach-Object {
-            #    Write-Host "##vso[build.uploadlog]$_"                
-            #}           
+            if($enableVerbose -eq $true) {
+                Get-ChildItem -Path "$reportsDirectory\log" -Recurse -Force | 
+                Foreach-Object {
+                    Write-Host "##vso[build.uploadlog]$_"                
+                }
+            }
         }
     } 
     else {
@@ -155,7 +179,7 @@ try {
     
     Write-Verbose "STDERR: $($_.Exception.Message)"
     Write-VstsTaskError $_.Exception
-    Write-VstsSetResult -Result 'Failed' -Message "Unhandled error condition detected" -DoNotThrow
+    Write-VstsSetResult -Result 'Failed' -Message "Unhandled error condition detected." -DoNotThrow
 } finally {
 	Trace-VstsLeavingInvocation $MyInvocation
 }
