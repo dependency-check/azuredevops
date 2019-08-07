@@ -1,9 +1,9 @@
 {
   "manifestVersion": 1,
   "id": "dependencycheck-dev",
-  "version": "5.2.1.001",
+  "version": "5.2.1.12",
   "name": "OWASP Dependency Check - DEV",
-  "public": true,
+  "public": false,
   "scopes": [
     "vso.build_execute"
   ],
@@ -46,8 +46,21 @@
   ],
   "screenshots": [
     {
+      "path": "screenshots/buildtask-configure.png"
+    },
+    {
+      "path": "screenshots/build-output.png"
+    },
+    {
+      "path": "screenshots/build-artifacts-explorer.png"
+    },
+    {
+      "path": "screenshots/build-tests.png"
+    },
+    {
       "path": "screenshots/report.png"
     }
+    
   ],
   "content": {
     "details": {
@@ -66,7 +79,7 @@
     }
   },
   "branding": {
-    "color": "rgb(247, 141, 10)",
+    "color": "rgb(255, 255, 255)",
     "theme": "light"
   },
   "files": [

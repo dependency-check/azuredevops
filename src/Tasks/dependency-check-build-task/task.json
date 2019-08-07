@@ -12,7 +12,7 @@
   "version": {
     "Major": 5,
     "Minor": 2,
-    "Patch": 1001
+    "Patch": 1012
   },
   "demands": [],
   "minimumAgentVersion": "2.0.0",
@@ -92,6 +92,14 @@
       "defaultValue": "false",
       "required": false,
       "helpMarkDown": "Enable the retired analyzers."
+    },
+    {
+      "name": "enableVerbose",
+      "type": "boolean",
+      "label": "Verbose",
+      "defaultValue": "false",
+      "required": false,
+      "helpMarkDown": "Enable verbose logging."
     },
     {
       "name": "additionalArguments",
