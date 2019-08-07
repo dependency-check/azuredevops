@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "dependencycheck-dev",
-  "version": "5.2.1.13",
+  "version": "5.2.1.14",
   "name": "OWASP Dependency Check - DEV",
   "public": false,
   "scopes": [

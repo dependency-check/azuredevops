@@ -20,15 +20,15 @@ The OWASP Dependency Check Azure DevOps Extension enables the following features
 
 - Press the **+** icon to add a new **OWASP Dependency Check** build task.
 
-<img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/buildtask-add.png">
+    <img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/buildtask-new.png">
 
 - Search for the **OWASP Dependency Check** task and press the **Add** button.
 
-<img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/buildtask-new.png">
+    <img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/buildtask-add.png">
 
 - Configure the build task with the appropriate [Dependency Check Command Line Arguments](https://jeremylong.github.io/DependencyCheck/dependency-check-cli/arguments.html).
 
-<img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/buildtask-configure.png">
+    <img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/buildtask-configure.png">
 
 ## Executing Dependency Check
 
@@ -36,29 +36,29 @@ The OWASP Dependency Check Azure DevOps Extension enables the following features
 
 - Review the build logs and ensure the the Dependency Check task successfully completed.
 
-<img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/build-success.png">
+    <img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/build-success.png">
 
 - Click on the Dependency Check build task to view the build output.
 
-<img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/build-output.png">
+    <img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/build-output.png">
 
 ## Dependency Check Reports
 
 - Each of the selected report formats are uploaded to the **Artifacts** for downloading.
 
-<img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/build-artifacts.png">
+    <img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/build-artifacts.png">
 
 - Select **Dependency Check** to open the **Artifact Explorer** and download the Dependency Check reports.
 
-<img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/build-artifacts-explorer.png">
+    <img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/build-artifacts-explorer.png">
 
 - Dependency Check supports exporting the results to JUNIT formatted test results. To parse the JUNIT test results, create a new **Publish Test Results** build task with the following configuration.
 
-<img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/buildtask-tests.png">
+    <img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/buildtask-tests.png">
 
 - View the **Tests** screen to view the passing and failing Dependency Check tests.
 
-<img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/build-tests.png">
+    <img src="https://raw.githubusercontent.com/dependency-check/azuredevops/master/screenshots/build-tests.png">
 
 ## Learn More
 
