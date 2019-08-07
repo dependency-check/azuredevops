@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "dependencycheck-dev",
-  "version": "5.2.1.12",
+  "version": "5.2.1.13",
   "name": "OWASP Dependency Check - DEV",
   "public": false,
   "scopes": [
@@ -47,12 +47,6 @@
   "screenshots": [
     {
       "path": "screenshots/buildtask-configure.png"
-    },
-    {
-      "path": "screenshots/build-output.png"
-    },
-    {
-      "path": "screenshots/build-artifacts-explorer.png"
     },
     {
       "path": "screenshots/build-tests.png"
