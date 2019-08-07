@@ -103,6 +103,18 @@ try {
         $arguments = $arguments + " " + $additionalArguments
     }
 
+    #Get dependency check data dir path
+    $dataDirectory = "dependency-check/data"
+    $dataDirectoryPath = $dataDirectory | Resolve-Path
+    
+    # Pull cached files
+    if(Test-Path $dataDirectoryPath -PathType Container) {
+        Write-Host -Verbose "Downloading Dependency Check vulnerability data..."
+        $ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest "https://dependencycheck.sec540.com/data/jsrepository.json" -OutFile "$dataDirectory/jsrepository.json"
+        Invoke-WebRequest "https://dependencycheck.sec540.com/data/odc.mv.db" -OutFile "$dataDirectory/odc.mv.db"
+    }
+
     #Get dependency check script path
     $depCheck = "dependency-check.bat"    
     $depCheckScripts = "dependency-check/bin"

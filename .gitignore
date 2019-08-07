@@ -28,5 +28,6 @@ node_modules
 .vscode
 *.vsix
 
-# Dep check data directory (not for git, needs to be in the build for caching data)
-src/Tasks/dependency-check-build-task/dependency-check/data/*
+# Dep check data directory files
+src/Tasks/dependency-check-build-task/dependency-check/data/*.json
+src/Tasks/dependency-check-build-task/dependency-check/data/*.db
