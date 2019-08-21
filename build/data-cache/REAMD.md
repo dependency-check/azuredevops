@@ -1,3 +1,3 @@
 # CVE Nightly Lambda Refresh
 
-Future home of a lambda function that will auto-refresh the CVE data feed.
+CodeBuild job that refreshes the Dependency Check data files on a nightly basis to help speed up the build task.
