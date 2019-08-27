@@ -110,6 +110,7 @@ try {
     # Pull cached files
     if(Test-Path $dataDirectoryPath -PathType Container) {
         Write-Host -Verbose "Downloading Dependency Check vulnerability data..."
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         $ProgressPreference = 'SilentlyContinue'
         Invoke-WebRequest "https://dependencycheck.sec540.com/data/jsrepository.json" -OutFile "$dataDirectory/jsrepository.json"
         Invoke-WebRequest "https://dependencycheck.sec540.com/data/odc.mv.db" -OutFile "$dataDirectory/odc.mv.db"
