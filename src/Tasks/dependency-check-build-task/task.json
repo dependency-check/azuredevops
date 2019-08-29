@@ -45,7 +45,7 @@
       "name": "format",
       "type": "pickList",
       "label": "Report Format",
-      "defaultValue": "html",
+      "defaultValue": "HTML",
       "required": true,
       "helpMarkDown": "The output format to write to (XML, HTML, CSV, JSON, JUNIT, ALL). Multiple formats can be selected. The default is HTML.",
       "properties": {
