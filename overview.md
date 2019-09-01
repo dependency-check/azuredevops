@@ -73,3 +73,5 @@ More details on configuring and running Dependency Check can be found at [https:
 Thank you to the following contributor(s) for this extension:
 
 - Eric Johnson ([@emjohn20](https://twitter.com/emjohn20)) - Principal Security Engineer, Puma Security
+
+- Even Schjølberg, Upheads
