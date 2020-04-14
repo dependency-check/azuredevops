@@ -70,7 +70,9 @@ More details on configuring and running Dependency Check can be found at [https:
 
 ## Contributors
 
-Thank you to the following contributor(s) for this extension:
+First thank [Jeremy Long](https://twitter.com/ctxt) and the folks working on the [OWASP Dependency Check](https://owasp.org/www-project-dependency-check/) project.
+
+The following contributor(s) help maintain the Azure DevOps extension:
 
 - Eric Johnson ([@emjohn20](https://twitter.com/emjohn20)) - Principal Security Engineer, Puma Security
 
