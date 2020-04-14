@@ -31,3 +31,4 @@ node_modules
 # Dep check data directory files
 src/Tasks/dependency-check-build-task/dependency-check/data/*.json
 src/Tasks/dependency-check-build-task/dependency-check/data/*.db
+src/Tasks/dependency-check-build-task/dependency-check-*.zip
