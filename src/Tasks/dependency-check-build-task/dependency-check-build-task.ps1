@@ -135,7 +135,7 @@ try {
     # Pull ODC cached file
     if([string]::IsNullOrEmpty($dataMirrorOdc) -eq $false ) {
         if(Test-Path $dataDirectoryPath -PathType Container) {
-            Write-Host -Verbose "Downloading Dependency Check vulnerability JSON data mirror..."
+            Write-Host -Verbose "Downloading Dependency Check vulnerability DB data mirror..."
             Invoke-WebRequest $dataMirrorOdc -OutFile "$dataDirectory/odc.mv.db"
         }
     }
