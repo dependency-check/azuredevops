@@ -5,10 +5,9 @@
   "description": "OWASP dependency-check is a software composition analysis utility that detects publicly disclosed vulnerabilities in application dependencies.",
   "scripts": {
     "build": "tsc -p .",
-    "postbuild": "npm run package",
-    "package": "tfx extension create --manifest-globs vss-extension.json",
-    "package-dev": "npm run clean && tfx extension create --manifest-globs vss-extension.dev.json",
-    "gallery-publish": "tfx extension publish",
+    "package-prod": "tfx extension create --manifest-globs vss-extension.prod.json",
+    "package-dev": "tfx extension create --manifest-globs vss-extension.dev.json",
+    "gallery-publish": "tfx extension publish --rev-version",
     "clean": "rimraf ./dist && rimraf ./*.vsix"
   },
   "devDependencies": {

@@ -35,6 +35,8 @@ try {
     $enableExperimental = Get-VstsInput -Name 'enableExperimental' -Require -AsBool
     $enableRetired = Get-VstsInput -Name 'enableRetired' -Require -AsBool
     $enableVerbose = Get-VstsInput -Name 'enableVerbose' -Require -AsBool
+    $dataMirrorJson = Get-VstsInput -Name 'dataMirrorJson' -Require -Default ''
+    $dataMirrorOdc = Get-VstsInput -Name 'dataMirrorOdc' -Require -Default ''
     $additionalArguments = Get-VstsInput -Name 'additionalArguments' -Default ''
 
     #Trim the strings
@@ -103,17 +105,39 @@ try {
         $arguments = $arguments + " " + $additionalArguments
     }
 
+    #Get dependency check path
+    $binDirectory = "dependency-check"
+    $binDirectory = $binDirectory | Resolve-Path
+
+    #Set PS invoke web args
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $ProgressPreference = 'SilentlyContinue'
+
+    # Pull installer file
+    if(Test-Path $binDirectory -PathType Container) {
+        Write-Host -Verbose "Downloading Dependency Check installer..."
+        Invoke-WebRequest "https://dl.bintray.com/jeremy-long/owasp/dependency-check-5.3.2-release.zip" -OutFile "dependency-check-5.3.2-release.zip"
+        Expand-Archive -Path dependency-check-5.3.2-release.zip -DestinationPath .
+    }
+
     #Get dependency check data dir path
     $dataDirectory = "dependency-check/data"
     $dataDirectoryPath = $dataDirectory | Resolve-Path
     
-    # Pull cached files
-    if(Test-Path $dataDirectoryPath -PathType Container) {
-        Write-Host -Verbose "Downloading Dependency Check vulnerability data..."
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        $ProgressPreference = 'SilentlyContinue'
-        Invoke-WebRequest "https://dependencycheck.sec540.com/data/jsrepository.json" -OutFile "$dataDirectory/jsrepository.json"
-        Invoke-WebRequest "https://dependencycheck.sec540.com/data/odc.mv.db" -OutFile "$dataDirectory/odc.mv.db"
+    # Pull JSON cached file
+    if([string]::IsNullOrEmpty($dataMirrorJson) -eq $false ) {
+        if(Test-Path $dataDirectoryPath -PathType Container) {
+            Write-Host -Verbose "Downloading Dependency Check vulnerability JSON data mirror..."
+            Invoke-WebRequest $dataMirrorJson -OutFile "$dataDirectory/jsrepository.json"
+        }
+    }
+
+    # Pull ODC cached file
+    if([string]::IsNullOrEmpty($dataMirrorOdc) -eq $false ) {
+        if(Test-Path $dataDirectoryPath -PathType Container) {
+            Write-Host -Verbose "Downloading Dependency Check vulnerability JSON data mirror..."
+            Invoke-WebRequest $dataMirrorOdc -OutFile "$dataDirectory/odc.mv.db"
+        }
     }
 
     #Get dependency check script path
