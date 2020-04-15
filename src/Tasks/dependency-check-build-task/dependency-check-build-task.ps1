@@ -35,8 +35,8 @@ try {
     $enableExperimental = Get-VstsInput -Name 'enableExperimental' -Require -AsBool
     $enableRetired = Get-VstsInput -Name 'enableRetired' -Require -AsBool
     $enableVerbose = Get-VstsInput -Name 'enableVerbose' -Require -AsBool
-    $dataMirrorJson = Get-VstsInput -Name 'dataMirrorJson' -Require -Default ''
-    $dataMirrorOdc = Get-VstsInput -Name 'dataMirrorOdc' -Require -Default ''
+    $dataMirrorJson = Get-VstsInput -Name 'dataMirrorJson' -Default ''
+    $dataMirrorOdc = Get-VstsInput -Name 'dataMirrorOdc' -Default ''
     $additionalArguments = Get-VstsInput -Name 'additionalArguments' -Default ''
 
     #Trim the strings
