@@ -1,8 +1,6 @@
 {
-  "id": "47EA1F4A-57BA-414A-B12E-C44F42765E72", //PROD
-  "name": "dependency-check-build-task", //PROD
-  //"id": "04450B31-9F11-415A-B37A-514D69EF69A1", //DEV
-  //"name": "dependency-check-build-task-dev", //DEV
+  "id": "[task id]",
+  "name": "[task name]",
   "friendlyName": "OWASP Dependency Check",
   "description": "Dependency Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project's dependencies.",
   "helpMarkDown": "[More Information](https://jeremylong.github.io/DependencyCheck/index.html)",
@@ -10,9 +8,9 @@
   "visibility": ["Build"],
   "author": "Dependency Check",
   "version": {
-    "Major": 5,
-    "Minor": 2,
-    "Patch": 1002
+    "Major": "[major]",
+    "Minor": "[minor]",
+    "Patch": "[patchrev]"
   },
   "demands": [],
   "minimumAgentVersion": "2.0.0",
@@ -100,6 +98,22 @@
       "defaultValue": "false",
       "required": false,
       "helpMarkDown": "Enable verbose logging."
+    },
+    {
+      "name": "dataMirrorOdc",
+      "type": "string",
+      "label": "ODC Database File Mirror (odc.mv.db) URL",
+      "helpMarkDown": "The https path to the cached Dependency Check database file (odc.mv.db).",
+      "defaultValue": "",
+      "required": false
+    },
+    {
+      "name": "dataMirrorJson",
+      "type": "string",
+      "label": "JSON Repository File Mirror (jsrepository.json) URL",
+      "helpMarkDown": "The https path to the cached Dependency Check JSON repository file (jsrepository.json).",
+      "defaultValue": "",
+      "required": false
     },
     {
       "name": "additionalArguments",

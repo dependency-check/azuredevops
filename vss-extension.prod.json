@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "dependencycheck",
-  "version": "5.2.1.2",
+  "version": "[version]",
   "name": "OWASP Dependency Check",
   "public": true,
   "scopes": [
