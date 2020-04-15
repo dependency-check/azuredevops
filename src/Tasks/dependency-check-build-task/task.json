@@ -105,7 +105,7 @@
       "label": "ODC Database File Mirror (odc.mv.db) URL",
       "helpMarkDown": "The https path to the cached Dependency Check database file (odc.mv.db).",
       "defaultValue": "",
-      "required": true
+      "required": false
     },
     {
       "name": "dataMirrorJson",
@@ -113,7 +113,7 @@
       "label": "JSON Repository File Mirror (jsrepository.json) URL",
       "helpMarkDown": "The https path to the cached Dependency Check JSON repository file (jsrepository.json).",
       "defaultValue": "",
-      "required": true
+      "required": false
     },
     {
       "name": "additionalArguments",
