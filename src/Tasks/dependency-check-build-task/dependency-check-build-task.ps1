@@ -117,7 +117,7 @@ try {
     if(Test-Path $binDirectory -PathType Container) {
         Write-Host -Verbose "Downloading Dependency Check installer..."
         Invoke-WebRequest "https://dl.bintray.com/jeremy-long/owasp/dependency-check-5.3.2-release.zip" -OutFile "dependency-check-5.3.2-release.zip"
-        Expand-Archive -Path dependency-check-5.3.2-release.zip -DestinationPath .
+        Expand-Archive -Path dependency-check-5.3.2-release.zip -DestinationPath . -Force
     }
 
     #Get dependency check data dir path
