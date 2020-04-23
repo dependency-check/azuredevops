@@ -155,6 +155,9 @@ try {
         Write-Host -Verbose "Path: $depCheckPath"
         Write-Host -Verbose "Arguments: $arguments"
 
+        # Set Java args
+        $env:JAVA_OPTS="-Xss8192k"
+
         # Run the scan
         $exitcode = (Start-Process -FilePath $depCheckPath -ArgumentList $arguments -PassThru -Wait -NoNewWindow).ExitCode
         Write-Host -Verbose "Dependency Check completed with exit code $exitcode."
