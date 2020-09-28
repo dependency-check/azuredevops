@@ -51,16 +51,17 @@ try {
     $additionalArguments = $additionalArguments.Trim();
     $localInstallPath = $localInstallPath.Trim();
 
-    #Create reports directory (if necessary)
-    if ($Env:BUILD_REPOSITORY_LOCALPATH -ne $suppressionPath){
+    #Set reports directory (if necessary)
+    if ($Env:BUILD_REPOSITORY_LOCALPATH -eq $reportsDirectory){
         $testDirectory = $Env:COMMON_TESTRESULTSDIRECTORY
         $reportsDirectory = "$testDirectory\dependency-check"
     }
+    Write-Host "Setting report directory to $reportsDirectory"
 
-    # Check if report directory does not exist
+    # Create report directory (if necessary)
     if(!(Test-Path -Path $reportsDirectory))
     {
-        Write-Host "Creating dependency check test results directory at $reportsDirectory"
+        Write-Host "Creating report directory at $reportsDirectory"
         New-Item $reportsDirectory -Type Directory
     }
 
@@ -117,13 +118,13 @@ try {
     $ProgressPreference = 'SilentlyContinue'
 
     # Set installation location
-    if ($Env:BUILD_REPOSITORY_LOCALPATH -ne $localInstallPath){
+    if ($Env:BUILD_REPOSITORY_LOCALPATH -eq $localInstallPath){
         #Get dependency check path
         $localInstallPath = "dependency-check"
         $localInstallPath = $localInstallPath | Resolve-Path
 
         if(Test-Path $binDirectory -PathType Container) {
-            Write-Host -Verbose "Downloading Dependency Check installer..."
+            Write-Host -Verbose "Downloading Dependency Check v$dependencyCheckVersion installer..."
             Invoke-WebRequest "https://github.com/jeremylong/DependencyCheck/releases/download/v$dependencyCheckVersion/dependency-check-$dependencyCheckVersion-release.zip" -OutFile "dependency-check-release.zip" 
             Expand-Archive -Path dependency-check-release.zip -DestinationPath . -Force
         }
@@ -146,7 +147,8 @@ try {
     $depCheck = "dependency-check.bat"    
     $depCheckScripts = "$localInstallPath/bin"
     $depCheckPath = $depCheckScripts | Resolve-Path | Join-Path -ChildPath "$depCheck"
-    
+    Write-Host -Verbose "Dependency Check installer set to $depCheckPath"
+
     #Default status to pass, change evaling the exit code below
     $failed = $false
 
