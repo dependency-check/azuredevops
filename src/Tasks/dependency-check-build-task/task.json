@@ -21,8 +21,7 @@
       "label": "Project Name",
       "helpMarkDown": "The name of the project being scanned.",
       "defaultValue": "",
-      "required": true,
-      "groupName": "Scan Configuration"
+      "required": true
     },
     {
       "name": "scanPath",
@@ -30,8 +29,7 @@
       "label": "Scan Path",
       "helpMarkDown": "The path to scan. Supports Ant style paths (e.g. 'directory/**/*.jar').",
       "defaultValue": "",
-      "required": true,
-      "groupName": "Scan Configuration"
+      "required": true
     },
     {
       "name": "excludePath",
@@ -39,8 +37,7 @@
       "label": "Exclude Path",
       "helpMarkDown": "The path patterns to exclude from the scan. Supports Ant style path patterns (e.g. /exclude/).",
       "defaultValue": "",
-      "required": false,
-      "groupName": "Scan Configuration"
+      "required": false
     },
     {
       "name": "format",
@@ -49,7 +46,6 @@
       "defaultValue": "HTML",
       "required": true,
       "helpMarkDown": "The output format to write to (XML, HTML, CSV, JSON, JUNIT, ALL). Multiple formats can be selected. The default is HTML.",
-      "groupName": "Scan Configuration",
       "properties": {
         "EditableOptions": "False",
         "MultiSelectFlatList": "True"
@@ -69,8 +65,7 @@
       "label": "CVSS Failure Threshold",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Threshold between 0 and 10 that will cause Dependency Check will return the exit code if a vulnerability with a CVSS score equal to or higher was identified.",
-      "groupName": "Scan Configuration"
+      "helpMarkDown": "Threshold between 0 and 10 that will cause Dependency Check will return the exit code if a vulnerability with a CVSS score equal to or higher was identified."
     },
     {
       "name": "suppressionPath",
@@ -78,8 +73,7 @@
       "label": "Suppression Paths",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "The file path to the suppression XML file used to suppress false positives. This can be specified more than once to utilize multiple suppression files. The argument can be a local file path, a URL to a suppression file, or even a reference to a file on the class path.",
-      "groupName": "Scan Configuration"
+      "helpMarkDown": "The file path to the suppression XML file used to suppress false positives. This can be specified more than once to utilize multiple suppression files. The argument can be a local file path, a URL to a suppression file, or even a reference to a file on the class path."
     },
     {
       "name": "reportsDirectory",
@@ -87,8 +81,7 @@
       "label": "Report Directory",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Report output directory. On-prem build agents can specify a local directory to override the default location. The default location is the $COMMON_TESTRESULTSDIRECTORY\\dependency-check directory.",
-      "groupName": "Scan Configuration"
+      "helpMarkDown": "Report output directory. On-prem build agents can specify a local directory to override the default location. The default location is the $COMMON_TESTRESULTSDIRECTORY\\dependency-check directory."
     },
     {
       "name": "enableExperimental",
@@ -96,8 +89,7 @@
       "label": "Experimental Analyzers",
       "defaultValue": "false",
       "required": false,
-      "helpMarkDown": "Enable the experimental analyzers.",
-      "groupName": "Scan Configuration"
+      "helpMarkDown": "Enable the experimental analyzers."
     },
     {
       "name": "enableRetired",
@@ -105,8 +97,7 @@
       "label": "Retired Analyzers",
       "defaultValue": "false",
       "required": false,
-      "helpMarkDown": "Enable the retired analyzers.",
-      "groupName": "Scan Configuration"
+      "helpMarkDown": "Enable the retired analyzers."
     },
     {
       "name": "enableVerbose",
@@ -114,8 +105,7 @@
       "label": "Verbose",
       "defaultValue": "false",
       "required": false,
-      "helpMarkDown": "Enable verbose logging.",
-      "groupName": "Scan Configuration"
+      "helpMarkDown": "Enable verbose logging."
     },
     {
       "name": "additionalArguments",
@@ -123,8 +113,7 @@
       "label": "Additional Arguments",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Pass additional command line arguments to the Dependency Check command line interface.",
-      "groupName": "Scan Configuration"
+      "helpMarkDown": "Pass additional command line arguments to the Dependency Check command line interface."
     },
     {
       "name": "localInstallPath",
@@ -132,8 +121,7 @@
       "label": "Local Install Path",
       "helpMarkDown": "The local path to the `dependency-check` installation directory (on-prem build agents only). Setting this field will run Dependency Check locally instead of downloading the installer onto the build agent.",
       "defaultValue": "",
-      "required": false,
-      "groupName": "Installer Configuration"
+      "required": false
     },
     {
       "name": "dependencyCheckVersion",
@@ -141,8 +129,7 @@
       "label": "Installer Version",
       "helpMarkDown": "The Dependency Check version to download (cloud-hosted build agents only). Setting this field will download Dependency Check locally onto the build agent during execution.",
       "defaultValue": "6.0.2",
-      "required": false,
-      "groupName": "Installer Configuration"
+      "required": false
     },
     {
       "name": "dataMirror",
@@ -150,8 +137,7 @@
       "label": "Data Mirror Archive URL",
       "helpMarkDown": "The https path to the compressed Dependency Check data directory (containing the odc.mv.db and jsrepository.json files).",
       "defaultValue": "",
-      "required": false,
-      "groupName": "Installer Configuration"
+      "required": false
     }
   ],
   "instanceNameFormat": "Dependency Check",
