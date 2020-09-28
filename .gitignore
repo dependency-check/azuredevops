@@ -23,6 +23,7 @@ dist/
 
 # Visual Studio 2015 cache/options directory
 .vs/
+.pumafile
 
 node_modules
 .vscode
