@@ -123,7 +123,7 @@ try {
         $localInstallPath = "dependency-check"
         $localInstallPath = $localInstallPath | Resolve-Path
 
-        if(Test-Path $binDirectory -PathType Container) {
+        if(Test-Path $localInstallPath -PathType Container) {
             Write-Host -Verbose "Downloading Dependency Check v$dependencyCheckVersion installer..."
             Invoke-WebRequest "https://github.com/jeremylong/DependencyCheck/releases/download/v$dependencyCheckVersion/dependency-check-$dependencyCheckVersion-release.zip" -OutFile "dependency-check-release.zip" 
             Expand-Archive -Path dependency-check-release.zip -DestinationPath . -Force
