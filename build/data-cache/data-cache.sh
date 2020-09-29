@@ -6,7 +6,7 @@ BUCKET_NAME=$3
 DISTRIBUTION_ID=$4
 
 #install dep check
-curl -sLo ./dependency-check-$VERSION-release.zip https://dl.bintray.com/jeremy-long/owasp/dependency-check-$VERSION-release.zip
+curl -sLo ./dependency-check-$VERSION-release.zip https://github.com/jeremylong/DependencyCheck/releases/download/v$VERSION/dependency-check-$VERSION-release.zip
 unzip -q ./dependency-check-$VERSION-release.zip
 
 #version check

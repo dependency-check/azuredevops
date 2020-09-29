@@ -32,11 +32,14 @@ try {
     $format = Get-VstsInput -Name 'format' -Require
     $failOnCVSS = Get-VstsInput -Name 'failOnCVSS' -Default ''
     $suppressionPath = Get-VstsInput -Name 'suppressionPath' -Default ''
+    $reportsDirectory = Get-VstsInput -Name 'reportsDirectory' -Default ''
     $enableExperimental = Get-VstsInput -Name 'enableExperimental' -Require -AsBool
     $enableRetired = Get-VstsInput -Name 'enableRetired' -Require -AsBool
     $enableVerbose = Get-VstsInput -Name 'enableVerbose' -Require -AsBool
-    $dataMirrorJson = Get-VstsInput -Name 'dataMirrorJson' -Default ''
-    $dataMirrorOdc = Get-VstsInput -Name 'dataMirrorOdc' -Default ''
+    $localInstallPath = Get-VstsInput -Name 'localInstallPath' -Default ''
+    $dependencyCheckVersion = Get-VstsInput -Name 'dependencyCheckVersion' -Default '6.0.2'
+    $dataMirror = Get-VstsInput -Name 'dataMirror' -Default ''
+    
     $additionalArguments = Get-VstsInput -Name 'additionalArguments' -Default ''
 
     #Trim the strings
@@ -44,16 +47,21 @@ try {
     $scanPath = $scanPath.Trim();
     $excludePath = $excludePath.Trim();
     $suppressionPath = $suppressionPath.Trim();
+    $reportsDirectory = $reportsDirectory.Trim();
     $additionalArguments = $additionalArguments.Trim();
+    $localInstallPath = $localInstallPath.Trim();
 
-    #Create reports directory
-    $testDirectory = $Env:COMMON_TESTRESULTSDIRECTORY
-    $reportsDirectory = "$testDirectory\dependency-check"
+    #Set reports directory (if necessary)
+    if ($Env:BUILD_REPOSITORY_LOCALPATH -eq $reportsDirectory){
+        $testDirectory = $Env:COMMON_TESTRESULTSDIRECTORY
+        $reportsDirectory = "$testDirectory\dependency-check"
+    }
+    Write-Host "Setting report directory to $reportsDirectory"
 
-    # Check if report directory does not exist
+    # Create report directory (if necessary)
     if(!(Test-Path -Path $reportsDirectory))
     {
-        Write-Host "Creating dependency check test results directory at $reportsDirectory"
+        Write-Host "Creating report directory at $reportsDirectory"
         New-Item $reportsDirectory -Type Directory
     }
 
@@ -105,46 +113,42 @@ try {
         $arguments = $arguments + " " + $additionalArguments
     }
 
-    #Get dependency check path
-    $binDirectory = "dependency-check"
-    $binDirectory = $binDirectory | Resolve-Path
-
     #Set PS invoke web args
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     $ProgressPreference = 'SilentlyContinue'
 
-    # Pull installer file
-    if(Test-Path $binDirectory -PathType Container) {
-        Write-Host -Verbose "Downloading Dependency Check installer..."
-        Invoke-WebRequest "https://dl.bintray.com/jeremy-long/owasp/dependency-check-5.3.2-release.zip" -OutFile "dependency-check-5.3.2-release.zip"
-        Expand-Archive -Path dependency-check-5.3.2-release.zip -DestinationPath . -Force
-    }
+    # Set installation location
+    if ($Env:BUILD_REPOSITORY_LOCALPATH -eq $localInstallPath){
+        #Get dependency check path
+        $localInstallPath = "dependency-check"
+        $localInstallPath = $localInstallPath | Resolve-Path
 
-    #Get dependency check data dir path
-    $dataDirectory = "dependency-check/data"
-    $dataDirectoryPath = $dataDirectory | Resolve-Path
-    
-    # Pull JSON cached file
-    if([string]::IsNullOrEmpty($dataMirrorJson) -eq $false ) {
-        if(Test-Path $dataDirectoryPath -PathType Container) {
-            Write-Host -Verbose "Downloading Dependency Check vulnerability JSON data mirror..."
-            Invoke-WebRequest $dataMirrorJson -OutFile "$dataDirectory/jsrepository.json"
+        if(Test-Path $localInstallPath -PathType Container) {
+            Write-Host -Verbose "Downloading Dependency Check v$dependencyCheckVersion installer..."
+            Invoke-WebRequest "https://github.com/jeremylong/DependencyCheck/releases/download/v$dependencyCheckVersion/dependency-check-$dependencyCheckVersion-release.zip" -OutFile "dependency-check-release.zip" 
+            Expand-Archive -Path dependency-check-release.zip -DestinationPath . -Force
         }
     }
 
-    # Pull ODC cached file
-    if([string]::IsNullOrEmpty($dataMirrorOdc) -eq $false ) {
+    #Get dependency check data dir path
+    $dataDirectory = "$localInstallPath/data"
+    $dataDirectoryPath = $dataDirectory | Resolve-Path
+    
+    # Pull cached data archive
+    if([string]::IsNullOrEmpty($dataMirror) -eq $false ) {
         if(Test-Path $dataDirectoryPath -PathType Container) {
-            Write-Host -Verbose "Downloading Dependency Check vulnerability DB data mirror..."
-            Invoke-WebRequest $dataMirrorOdc -OutFile "$dataDirectory/odc.mv.db"
+            Write-Host -Verbose "Downloading Dependency Check data cache archive..."
+            Invoke-WebRequest $dataMirror -OutFile "$dataDirectory/data.zip"
+            Expand-Archive -Path "$dataDirectory/data.zip" -DestinationPath "$dataDirectory" -Force
         }
     }
 
     #Get dependency check script path
     $depCheck = "dependency-check.bat"    
-    $depCheckScripts = "dependency-check/bin"
+    $depCheckScripts = "$localInstallPath/bin"
     $depCheckPath = $depCheckScripts | Resolve-Path | Join-Path -ChildPath "$depCheck"
-    
+    Write-Host -Verbose "Dependency Check installer set to $depCheckPath"
+
     #Default status to pass, change evaling the exit code below
     $failed = $false
 
