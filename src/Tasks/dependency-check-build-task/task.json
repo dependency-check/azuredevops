@@ -138,6 +138,14 @@
       "helpMarkDown": "The https path to the compressed Dependency Check data directory (containing the odc.mv.db and jsrepository.json files).",
       "defaultValue": "",
       "required": false
+    },
+    {
+      "name": "customRepo",
+      "type": "string",
+      "label": "Custom Repository URL",
+      "helpMarkDown": "If left empty will use official URL to download OWASP Dependency Check",
+      "defaultValue": "",
+      "required": false
     }
   ],
   "instanceNameFormat": "Dependency Check",
