@@ -130,7 +130,7 @@ try {
                 Invoke-WebRequest $customRepo -OutFile "dependency-check-release.zip" 
             } 
             else {
-                Write-Host -Verbose "Downloading Dependency Check v$dependencyCheckVersion installer..."
+                Write-Host -Verbose "Downloading Dependency Check v$dependencyCheckVersion installer from GitHub..."
                 Invoke-WebRequest "https://github.com/jeremylong/DependencyCheck/releases/download/v$dependencyCheckVersion/dependency-check-$dependencyCheckVersion-release.zip" -OutFile "dependency-check-release.zip" 
             }
             Expand-Archive -Path dependency-check-release.zip -DestinationPath . -Force
@@ -168,6 +168,9 @@ try {
 
         # Set Java args
         $env:JAVA_OPTS="-Xss8192k"
+
+        # Version smoke test
+        $exitcode = (Start-Process -FilePath $depCheckPath -ArgumentList "--version" -PassThru -Wait -NoNewWindow).ExitCode
 
         # Run the scan
         $exitcode = (Start-Process -FilePath $depCheckPath -ArgumentList $arguments -PassThru -Wait -NoNewWindow).ExitCode

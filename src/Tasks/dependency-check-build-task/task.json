@@ -119,7 +119,15 @@
       "name": "localInstallPath",
       "type": "filePath",
       "label": "Local Install Path",
-      "helpMarkDown": "The local path to the `dependency-check` installation directory (on-prem build agents only). Setting this field will run Dependency Check locally instead of downloading the installer onto the build agent.",
+      "helpMarkDown": "The local path to the `dependency-check` installation directory (on-prem build agents only). Setting this field will run the Dependency Check locally instead of downloading the installer onto the build agent.",
+      "defaultValue": "",
+      "required": false
+    },
+    {
+      "name": "customRepo",
+      "type": "string",
+      "label": "Custom Installer Repository URL",
+      "helpMarkDown": "By default, the build task downloads the installer from the Dependency Check GitHub releases. Entering a value for this field will pull the installer package from a custom endpoint.",
       "defaultValue": "",
       "required": false
     },
@@ -127,7 +135,7 @@
       "name": "dependencyCheckVersion",
       "type": "string",
       "label": "Installer Version",
-      "helpMarkDown": "The Dependency Check version to download (cloud-hosted build agents only). Setting this field will download Dependency Check locally onto the build agent during execution.",
+      "helpMarkDown": "By default, the build task downloads the installer from the Dependency Check GitHub releases. Setting this field will change the Dependency Check version downloaded onto the build agent.",
       "defaultValue": "6.0.2",
       "required": false
     },
@@ -136,14 +144,6 @@
       "type": "string",
       "label": "Data Mirror Archive URL",
       "helpMarkDown": "The https path to the compressed Dependency Check data directory (containing the odc.mv.db and jsrepository.json files).",
-      "defaultValue": "",
-      "required": false
-    },
-    {
-      "name": "customRepo",
-      "type": "string",
-      "label": "Custom Repository URL",
-      "helpMarkDown": "If left empty will use official URL to download OWASP Dependency Check",
       "defaultValue": "",
       "required": false
     }
