@@ -39,6 +39,7 @@ try {
     $localInstallPath = Get-VstsInput -Name 'localInstallPath' -Default ''
     $dependencyCheckVersion = Get-VstsInput -Name 'dependencyCheckVersion' -Default '6.0.2'
     $dataMirror = Get-VstsInput -Name 'dataMirror' -Default ''
+    $customRepo = Get-VstsInput -Name 'customRepo' -Default ''
     
     $additionalArguments = Get-VstsInput -Name 'additionalArguments' -Default ''
 
@@ -124,8 +125,14 @@ try {
         $localInstallPath = $localInstallPath | Resolve-Path
 
         if(Test-Path $localInstallPath -PathType Container) {
-            Write-Host -Verbose "Downloading Dependency Check v$dependencyCheckVersion installer..."
-            Invoke-WebRequest "https://github.com/jeremylong/DependencyCheck/releases/download/v$dependencyCheckVersion/dependency-check-$dependencyCheckVersion-release.zip" -OutFile "dependency-check-release.zip" 
+            if([string]::IsNullOrEmpty($customRepo) -eq $false ) {
+                Write-Host -Verbose "Downloading Dependency Check installer from $customRepo..."
+                Invoke-WebRequest $customRepo -OutFile "dependency-check-release.zip" 
+            } 
+            else {
+                Write-Host -Verbose "Downloading Dependency Check v$dependencyCheckVersion installer from GitHub..."
+                Invoke-WebRequest "https://github.com/jeremylong/DependencyCheck/releases/download/v$dependencyCheckVersion/dependency-check-$dependencyCheckVersion-release.zip" -OutFile "dependency-check-release.zip" 
+            }
             Expand-Archive -Path dependency-check-release.zip -DestinationPath . -Force
         }
     }
@@ -161,6 +168,9 @@ try {
 
         # Set Java args
         $env:JAVA_OPTS="-Xss8192k"
+
+        # Version smoke test
+        $exitcode = (Start-Process -FilePath $depCheckPath -ArgumentList "--version" -PassThru -Wait -NoNewWindow).ExitCode
 
         # Run the scan
         $exitcode = (Start-Process -FilePath $depCheckPath -ArgumentList $arguments -PassThru -Wait -NoNewWindow).ExitCode
@@ -229,3 +239,4 @@ try {
 }
  
 Write-Output "Ending Dependency Check..."
+
