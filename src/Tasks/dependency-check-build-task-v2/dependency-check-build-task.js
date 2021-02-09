@@ -14,6 +14,12 @@ const httpClient = require("typed-rest-client/HttpClient");
 const unzipper = require("unzipper");
 const client = new httpClient.HttpClient('DC_AGENT');
 const releaseApi = 'https://api.github.com/repos/jeremylong/DependencyCheck/releases';
+// Install prerequisites : https://docs.microsoft.com/en-us/azure/devops/extend/develop/add-build-task?view=azure-devops#prerequisites
+// To test locally Run:
+// cd ./Tasks/dependency-check-build-task-v2/
+// npm install
+// tsc
+// node dependency-check-build-task.js
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Starting Dependency Check...");
@@ -102,7 +108,23 @@ function run() {
                 }
                 yield unzip(url);
             }
-            console.log(args);
+            // Get dependency check data dir path
+            let dataDirectory = `${localInstallPath}/data`;
+            // Pull cached data archive
+            if (dataMirror && tl.exist(dataDirectory)) {
+                console.log('Downloading Dependency Check data cache archive...');
+                unzip(dataMirror, dataDirectory);
+            }
+            // Get dependency check script path
+            let depCheck = 'dependency-check.bat';
+            if (tl.osType().match(/^Linux/))
+                depCheck = 'dependency-check.sh';
+            let depCheckPath = `${localInstallPath}/bin/${depCheck}`;
+            console.log(`Dependency Check installer set to ${depCheckPath}`);
+            tl.checkPath(depCheckPath, 'Dependency Check installer');
+            console.log('Invoking Dependency Check...');
+            console.log(`Path: ${depCheckPath}`);
+            console.log(`Arguments: ${args}`);
         }
         catch (err) {
             console.log(err.message);
@@ -123,10 +145,10 @@ function getUrl(version) {
         return asset['browser_download_url'];
     });
 }
-function unzip(url) {
+function unzip(url, directory) {
     return __awaiter(this, void 0, void 0, function* () {
         let response = yield client.get(url);
-        yield response.message.pipe(unzipper.Extract({ path: './' }));
+        yield response.message.pipe(unzipper.Extract({ path: directory !== null && directory !== void 0 ? directory : './' }));
     });
 }
 run();

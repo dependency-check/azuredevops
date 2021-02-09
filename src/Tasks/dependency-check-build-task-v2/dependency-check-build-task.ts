@@ -2,6 +2,7 @@ import tl = require('azure-pipelines-task-lib/task');
 import fs = require('fs');
 import httpClient = require('typed-rest-client/HttpClient');
 import unzipper = require('unzipper');
+import os = require('os');
 
 const client = new httpClient.HttpClient('DC_AGENT');
 const releaseApi = 'https://api.github.com/repos/jeremylong/DependencyCheck/releases';
@@ -117,7 +118,25 @@ async function run() {
             await unzip(url);
         }
 
-        console.log(args);
+        // Get dependency check data dir path
+        let dataDirectory = `${localInstallPath}/data`;
+
+        // Pull cached data archive
+        if (dataMirror && tl.exist(dataDirectory)) {
+            console.log('Downloading Dependency Check data cache archive...');
+            unzip(dataMirror, dataDirectory);
+        }
+
+        // Get dependency check script path
+        let depCheck = 'dependency-check.bat';
+        if (tl.osType().match(/^Linux/)) depCheck = 'dependency-check.sh';
+        let depCheckPath = `${localInstallPath}/bin/${depCheck}`;
+        console.log(`Dependency Check installer set to ${depCheckPath}`);
+
+        tl.checkPath(depCheckPath, 'Dependency Check installer');
+        console.log('Invoking Dependency Check...');
+        console.log(`Path: ${depCheckPath}`);
+        console.log(`Arguments: ${args}`);
     }
     catch (err) {
         console.log(err.message);
@@ -140,9 +159,9 @@ async function getUrl(version) {
     return asset['browser_download_url'];
 }
 
-async function unzip(url) {
+async function unzip(url, directory?) {
     let response = await client.get(url);
-    await response.message.pipe(unzipper.Extract({ path: './' }));
+    await response.message.pipe(unzipper.Extract({ path: directory ?? './' }));
 }
 
 run();
