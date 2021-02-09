@@ -4,8 +4,7 @@
   "description": "",
   "main": "dependency-check-build-task.js",
   "scripts": {
-    "install-libs": "npm install",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "install-libs": "npm install"
   },
   "author": "Dependency Check",
   "license": "Apache-2.0",

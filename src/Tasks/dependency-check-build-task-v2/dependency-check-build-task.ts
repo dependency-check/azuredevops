@@ -1,11 +1,17 @@
 import tl = require('azure-pipelines-task-lib/task');
 import fs = require('fs');
-import { release } from 'os';
 import httpClient = require('typed-rest-client/HttpClient');
 import unzipper = require('unzipper');
 
 const client = new httpClient.HttpClient('DC_AGENT');
 const releaseApi = 'https://api.github.com/repos/jeremylong/DependencyCheck/releases';
+
+// Install prerequisites : https://docs.microsoft.com/en-us/azure/devops/extend/develop/add-build-task?view=azure-devops#prerequisites
+// To test locally Run:
+// cd ./Tasks/dependency-check-build-task-v2/
+// npm install
+// tsc
+// node dependency-check-build-task.js
 
 async function run() {
     console.log("Starting Dependency Check...")
