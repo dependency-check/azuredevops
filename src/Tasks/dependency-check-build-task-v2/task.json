@@ -150,7 +150,7 @@
   ],
   "instanceNameFormat": "Dependency Check",
   "execution": {
-    "Node10": {
+    "Node": {
       "target": "$(currentDirectory)\\dependency-check-build-task.js",
       "argumentFormat": "",
       "workingDirectory": "$(currentDirectory)"
