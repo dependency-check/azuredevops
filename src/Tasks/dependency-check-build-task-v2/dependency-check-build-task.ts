@@ -23,7 +23,7 @@ async function run() {
         let scanPath: string | undefined = tl.getPathInput('scanPath', true, true);
         let excludePath: string | undefined = tl.getPathInput('excludePath');
         let format: string | undefined = tl.getInput('format', true);
-        let failOnCVSS: boolean | undefined = tl.getBoolInput('failOnCVSS');
+        let failOnCVSS: string | undefined = tl.getInput('failOnCVSS');
         let suppressionPath: string | undefined = tl.getPathInput('suppressionPath');
         let reportsDirectory: string | undefined = tl.getPathInput('reportsDirectory');
         let enableExperimental: boolean | undefined = tl.getBoolInput('enableExperimental', true);
@@ -90,7 +90,7 @@ async function run() {
         if (enableVerbose)
             args += ` --log "${tl.resolve(reportsDirectory, 'log')}"`;
 
-        // additionalArguments
+        // Set additionalArguments
         if (additionalArguments)
             args += ` ${additionalArguments}`;
 
@@ -145,8 +145,28 @@ async function run() {
         // Run the scan
         let exitCode = await tl.tool(depCheckPath).line(args).exec();
         console.log(`Dependency Check completed with exit code ${exitCode}.`);
-        console.log('Dependency check reports:');
+        console.log('Dependency Check reports:');
         console.log(tl.find(reportsDirectory));
+
+        // Process based on exit code
+        let failed = exitCode != 0;
+        let isViolation = exitCode == 1;
+
+        // Process scan artifacts is required
+        let processArtifacts = !failed || isViolation;
+        if (processArtifacts) {
+            console.log("Attachments:");
+            let reports = tl.find(reportsDirectory);
+            console.log(reports);
+        }
+
+        if (failed) {
+            let message = "Dependency Check exited with an error code.";
+            if (isViolation) message = "CVSS threshold violation.";
+
+            tl.error(message);
+            tl.setResult(tl.TaskResult.Failed, message);
+        }
     }
     catch (err) {
         console.log(err.message);
