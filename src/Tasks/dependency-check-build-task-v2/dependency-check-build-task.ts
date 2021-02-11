@@ -1,8 +1,9 @@
 import tl = require('azure-pipelines-task-lib/task');
-import fs = require('fs');
 import httpClient = require('typed-rest-client/HttpClient');
-import unzipper = require('unzipper');
-import os = require('os');
+import fs = require('fs');
+import url = require("url");
+import path = require("path");
+import DecompressZip = require('decompress-zip');
 
 const client = new httpClient.HttpClient('DC_AGENT');
 const releaseApi = 'https://api.github.com/repos/jeremylong/DependencyCheck/releases';
@@ -46,9 +47,8 @@ async function run() {
         let testDir = tl.getVariable('Common.TestResultsDirectory');
 
         // Set reports directory (if necessary)
-        if (!reportsDirectory) {
-            reportsDirectory = `${testDir}\\dependency-check`;
-        }
+        if (!reportsDirectory)
+            reportsDirectory = tl.resolve(testDir, 'dependency-check');
         console.log(`Setting report directory to ${reportsDirectory}`);
 
         // Create report directory (if necessary)
@@ -61,9 +61,8 @@ async function run() {
         let args = `--project "${projectName}" --scan "${scanPath}" --out "${reportsDirectory}"`;
 
         // Exclude switch
-        if (excludePath) {
+        if (excludePath)
             args += ` --exclude "${excludePath}"`;
-        }
 
         // Format types
         let outputTypes = format?.split(',');
@@ -72,38 +71,34 @@ async function run() {
         });
 
         // Fail on CVSS switch
-        if (failOnCVSS) {
+        if (failOnCVSS)
             args += ` --failOnCVSS ${failOnCVSS}`;
-        }
 
         // Suppression switch
-        if (suppressionPath) {
+        if (suppressionPath)
             args += ` --suppression "${suppressionPath}"`;
-        }
 
         // Set enableExperimental option if requested
-        if (enableExperimental) {
+        if (enableExperimental)
             args += ' --enableExperimental';
-        }
 
         // Set enableRetired option if requested
-        if (enableRetired) {
+        if (enableRetired)
             args += ' --enableRetired';
-        }
 
         // Set log switch if requested
-        if (enableVerbose) {
-            args += ` --log "${reportsDirectory}\log"`;
-        }
+        if (enableVerbose)
+            args += ` --log "${tl.resolve(reportsDirectory, 'log')}"`;
 
         // additionalArguments
-        if (additionalArguments) {
+        if (additionalArguments)
             args += ` ${additionalArguments}`;
-        }
 
         // Set installation location
         if (!localInstallPath) {
-            localInstallPath = 'dependency-check';
+            localInstallPath = tl.resolve('./dependency-check');
+
+            tl.checkPath(localInstallPath, 'Dependency Check installer');
 
             let url;
             if (customRepo) {
@@ -112,31 +107,46 @@ async function run() {
             }
             else {
                 console.log(`Downloading Dependency Check ${dependencyCheckVersion} installer from GitHub..`);
-                url = await getUrl(dependencyCheckVersion);
+                url = await getZipUrl(dependencyCheckVersion);
             }
 
-            await unzip(url);
+            tl.rmRF(localInstallPath);
+            await unzipFromUrl(url, tl.resolve('./'));
         }
 
         // Get dependency check data dir path
-        let dataDirectory = `${localInstallPath}/data`;
+        let dataDirectory = tl.resolve(localInstallPath, 'data');
 
         // Pull cached data archive
         if (dataMirror && tl.exist(dataDirectory)) {
             console.log('Downloading Dependency Check data cache archive...');
-            unzip(dataMirror, dataDirectory);
+            await unzipFromUrl(dataMirror, dataDirectory);
         }
 
         // Get dependency check script path
         let depCheck = 'dependency-check.bat';
         if (tl.osType().match(/^Linux/)) depCheck = 'dependency-check.sh';
-        let depCheckPath = `${localInstallPath}/bin/${depCheck}`;
-        console.log(`Dependency Check installer set to ${depCheckPath}`);
+        let depCheckPath = tl.resolve(localInstallPath, 'bin', depCheck);
+        console.log(`Dependency Check script set to ${depCheckPath}`);
 
-        tl.checkPath(depCheckPath, 'Dependency Check installer');
+        tl.checkPath(depCheckPath, 'Dependency Check script');
+
+        // Console output for the log file
         console.log('Invoking Dependency Check...');
         console.log(`Path: ${depCheckPath}`);
         console.log(`Arguments: ${args}`);
+
+        // Set Java args
+        tl.setVariable('JAVA_OPTS', '-Xss8192k');
+
+        // Version smoke test
+        await tl.tool(depCheckPath).arg('--version').exec({ failOnStdErr: true });
+
+        // Run the scan
+        let exitCode = await tl.tool(depCheckPath).line(args).exec();
+        console.log(`Dependency Check completed with exit code ${exitCode}.`);
+        console.log('Dependency check reports:');
+        console.log(tl.find(reportsDirectory));
     }
     catch (err) {
         console.log(err.message);
@@ -147,10 +157,9 @@ async function run() {
     console.log("Ending Dependency Check...");
 }
 
-async function getUrl(version) {
+async function getZipUrl(version: string): Promise<void> {
     let url = `${releaseApi}/tags/v${version}`;
-    if (version == 'latest')
-        url = `${releaseApi}/${version}`;
+    if (version == 'latest') url = `${releaseApi}/${version}`;
 
     let response = await client.get(url);
     let releaseInfo = JSON.parse(await response.readBody());
@@ -159,9 +168,37 @@ async function getUrl(version) {
     return asset['browser_download_url'];
 }
 
-async function unzip(url, directory?) {
-    let response = await client.get(url);
-    await response.message.pipe(unzipper.Extract({ path: directory ?? './' }));
+async function unzipFromUrl(zipUrl: string, unzipLocation: string): Promise<void> {
+    let fileName = path.basename(url.parse(zipUrl).pathname);
+    let zipLocation = tl.resolve(fileName)
+
+    let response = await client.get(zipUrl);
+
+    await new Promise<void>(function (resolve, reject) {
+        let writer = fs.createWriteStream(zipLocation);
+        writer.on('error', err => reject(err));
+        writer.on('finish', log => resolve());
+        response.message.pipe(writer);
+    });
+
+    await unzipFromFile(zipLocation, unzipLocation);
+    tl.rmRF(zipLocation);
+}
+
+async function unzipFromFile(zipLocation: string, unzipLocation: string): Promise<void> {
+    await new Promise<void>(function (resolve, reject) {
+        tl.debug('Extracting ' + zipLocation + ' to ' + unzipLocation);
+
+        var unzipper = new DecompressZip(zipLocation);
+        unzipper.on('error', err => reject(err));
+        unzipper.on('extract', log => {
+            tl.debug('Extracted ' + zipLocation + ' to ' + unzipLocation + ' successfully');
+            return resolve();
+        });
+        unzipper.extract({
+            path: unzipLocation
+        });
+    });
 }
 
 run();

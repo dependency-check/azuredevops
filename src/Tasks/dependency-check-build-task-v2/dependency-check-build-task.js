@@ -11,7 +11,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const tl = require("azure-pipelines-task-lib/task");
 const httpClient = require("typed-rest-client/HttpClient");
-const unzipper = require("unzipper");
+const fs = require("fs");
+const url = require("url");
+const path = require("path");
+const DecompressZip = require("decompress-zip");
 const client = new httpClient.HttpClient('DC_AGENT');
 const releaseApi = 'https://api.github.com/repos/jeremylong/DependencyCheck/releases';
 // Install prerequisites : https://docs.microsoft.com/en-us/azure/devops/extend/develop/add-build-task?view=azure-devops#prerequisites
@@ -50,9 +53,8 @@ function run() {
             localInstallPath = localInstallPath === null || localInstallPath === void 0 ? void 0 : localInstallPath.trim();
             let testDir = tl.getVariable('Common.TestResultsDirectory');
             // Set reports directory (if necessary)
-            if (!reportsDirectory) {
-                reportsDirectory = `${testDir}\\dependency-check`;
-            }
+            if (!reportsDirectory)
+                reportsDirectory = tl.resolve(testDir, 'dependency-check');
             console.log(`Setting report directory to ${reportsDirectory}`);
             // Create report directory (if necessary)
             if (!tl.exist(reportsDirectory)) {
@@ -62,41 +64,35 @@ function run() {
             // Default args
             let args = `--project "${projectName}" --scan "${scanPath}" --out "${reportsDirectory}"`;
             // Exclude switch
-            if (excludePath) {
+            if (excludePath)
                 args += ` --exclude "${excludePath}"`;
-            }
             // Format types
             let outputTypes = format === null || format === void 0 ? void 0 : format.split(',');
             outputTypes === null || outputTypes === void 0 ? void 0 : outputTypes.forEach(function (outputType) {
                 args += ` --format ${outputType}`;
             });
             // Fail on CVSS switch
-            if (failOnCVSS) {
+            if (failOnCVSS)
                 args += ` --failOnCVSS ${failOnCVSS}`;
-            }
             // Suppression switch
-            if (suppressionPath) {
+            if (suppressionPath)
                 args += ` --suppression "${suppressionPath}"`;
-            }
             // Set enableExperimental option if requested
-            if (enableExperimental) {
+            if (enableExperimental)
                 args += ' --enableExperimental';
-            }
             // Set enableRetired option if requested
-            if (enableRetired) {
+            if (enableRetired)
                 args += ' --enableRetired';
-            }
             // Set log switch if requested
-            if (enableVerbose) {
-                args += ` --log "${reportsDirectory}\log"`;
-            }
+            if (enableVerbose)
+                args += ` --log "${tl.resolve(reportsDirectory, 'log')}"`;
             // additionalArguments
-            if (additionalArguments) {
+            if (additionalArguments)
                 args += ` ${additionalArguments}`;
-            }
             // Set installation location
             if (!localInstallPath) {
-                localInstallPath = 'dependency-check';
+                localInstallPath = tl.resolve('./dependency-check');
+                tl.checkPath(localInstallPath, 'Dependency Check installer');
                 let url;
                 if (customRepo) {
                     console.log(`Downloading Dependency Check installer from ${customRepo}...`);
@@ -104,27 +100,38 @@ function run() {
                 }
                 else {
                     console.log(`Downloading Dependency Check ${dependencyCheckVersion} installer from GitHub..`);
-                    url = yield getUrl(dependencyCheckVersion);
+                    url = yield getZipUrl(dependencyCheckVersion);
                 }
-                yield unzip(url);
+                tl.rmRF(localInstallPath);
+                yield unzipFromUrl(url, tl.resolve('./'));
             }
             // Get dependency check data dir path
-            let dataDirectory = `${localInstallPath}/data`;
+            let dataDirectory = tl.resolve(localInstallPath, 'data');
             // Pull cached data archive
             if (dataMirror && tl.exist(dataDirectory)) {
                 console.log('Downloading Dependency Check data cache archive...');
-                unzip(dataMirror, dataDirectory);
+                yield unzipFromUrl(dataMirror, dataDirectory);
             }
             // Get dependency check script path
             let depCheck = 'dependency-check.bat';
             if (tl.osType().match(/^Linux/))
                 depCheck = 'dependency-check.sh';
-            let depCheckPath = `${localInstallPath}/bin/${depCheck}`;
-            console.log(`Dependency Check installer set to ${depCheckPath}`);
-            tl.checkPath(depCheckPath, 'Dependency Check installer');
+            let depCheckPath = tl.resolve(localInstallPath, 'bin', depCheck);
+            console.log(`Dependency Check script set to ${depCheckPath}`);
+            tl.checkPath(depCheckPath, 'Dependency Check script');
+            // Console output for the log file
             console.log('Invoking Dependency Check...');
             console.log(`Path: ${depCheckPath}`);
             console.log(`Arguments: ${args}`);
+            // Set Java args
+            tl.setVariable('JAVA_OPTS', '-Xss8192k');
+            // Version smoke test
+            yield tl.tool(depCheckPath).arg('--version').exec({ failOnStdErr: true });
+            // Run the scan
+            let exitCode = yield tl.tool(depCheckPath).line(args).exec();
+            console.log(`Dependency Check completed with exit code ${exitCode}.`);
+            console.log('Dependency check reports:');
+            console.log(tl.find(reportsDirectory));
         }
         catch (err) {
             console.log(err.message);
@@ -134,7 +141,7 @@ function run() {
         console.log("Ending Dependency Check...");
     });
 }
-function getUrl(version) {
+function getZipUrl(version) {
     return __awaiter(this, void 0, void 0, function* () {
         let url = `${releaseApi}/tags/v${version}`;
         if (version == 'latest')
@@ -145,10 +152,35 @@ function getUrl(version) {
         return asset['browser_download_url'];
     });
 }
-function unzip(url, directory) {
+function unzipFromUrl(zipUrl, unzipLocation) {
     return __awaiter(this, void 0, void 0, function* () {
-        let response = yield client.get(url);
-        yield response.message.pipe(unzipper.Extract({ path: directory !== null && directory !== void 0 ? directory : './' }));
+        let fileName = path.basename(url.parse(zipUrl).pathname);
+        let zipLocation = tl.resolve(fileName);
+        let response = yield client.get(zipUrl);
+        yield new Promise(function (resolve, reject) {
+            let writer = fs.createWriteStream(zipLocation);
+            writer.on('error', err => reject(err));
+            writer.on('finish', log => resolve());
+            response.message.pipe(writer);
+        });
+        yield unzipFromFile(zipLocation, unzipLocation);
+        tl.rmRF(zipLocation);
+    });
+}
+function unzipFromFile(zipLocation, unzipLocation) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield new Promise(function (resolve, reject) {
+            tl.debug('Extracting ' + zipLocation + ' to ' + unzipLocation);
+            var unzipper = new DecompressZip(zipLocation);
+            unzipper.on('error', err => reject(err));
+            unzipper.on('extract', log => {
+                tl.debug('Extracted ' + zipLocation + ' to ' + unzipLocation + ' successfully');
+                return resolve();
+            });
+            unzipper.extract({
+                path: unzipLocation
+            });
+        });
     });
 }
 run();
