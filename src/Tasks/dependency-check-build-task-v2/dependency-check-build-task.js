@@ -93,17 +93,17 @@ function run() {
             if (!localInstallPath) {
                 localInstallPath = tl.resolve('./dependency-check');
                 tl.checkPath(localInstallPath, 'Dependency Check installer');
-                let url;
+                let zipUrl;
                 if (customRepo) {
                     console.log(`Downloading Dependency Check installer from ${customRepo}...`);
-                    url = customRepo;
+                    zipUrl = customRepo;
                 }
                 else {
                     console.log(`Downloading Dependency Check ${dependencyCheckVersion} installer from GitHub..`);
-                    url = yield getZipUrl(dependencyCheckVersion);
+                    zipUrl = yield getZipUrl(dependencyCheckVersion);
                 }
                 tl.rmRF(localInstallPath);
-                yield unzipFromUrl(url, tl.resolve('./'));
+                yield unzipFromUrl(zipUrl, tl.resolve('./'));
             }
             // Get dependency check data dir path
             let dataDirectory = tl.resolve(localInstallPath, 'data');

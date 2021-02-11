@@ -100,18 +100,18 @@ async function run() {
 
             tl.checkPath(localInstallPath, 'Dependency Check installer');
 
-            let url;
+            let zipUrl;
             if (customRepo) {
                 console.log(`Downloading Dependency Check installer from ${customRepo}...`);
-                url = customRepo;
+                zipUrl = customRepo;
             }
             else {
                 console.log(`Downloading Dependency Check ${dependencyCheckVersion} installer from GitHub..`);
-                url = await getZipUrl(dependencyCheckVersion);
+                zipUrl = await getZipUrl(dependencyCheckVersion);
             }
 
             tl.rmRF(localInstallPath);
-            await unzipFromUrl(url, tl.resolve('./'));
+            await unzipFromUrl(zipUrl, tl.resolve('./'));
         }
 
         // Get dependency check data dir path
