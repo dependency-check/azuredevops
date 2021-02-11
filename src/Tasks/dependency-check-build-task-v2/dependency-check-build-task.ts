@@ -110,7 +110,7 @@ async function run() {
                 zipUrl = await getZipUrl(dependencyCheckVersion);
             }
 
-            tl.rmRF(localInstallPath);
+            cleanLocalInstallPath(localInstallPath);
             await unzipFromUrl(zipUrl, tl.resolve('./'));
         }
 
@@ -155,6 +155,11 @@ async function run() {
     }
 
     console.log("Ending Dependency Check...");
+}
+
+function cleanLocalInstallPath(localInstallPath: string) {
+    let files = tl.findMatch(localInstallPath, ['**', '!data', '!data/**']);
+    files.forEach(file => tl.rmRF(file));
 }
 
 async function getZipUrl(version: string): Promise<void> {

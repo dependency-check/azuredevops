@@ -102,7 +102,7 @@ function run() {
                     console.log(`Downloading Dependency Check ${dependencyCheckVersion} installer from GitHub..`);
                     zipUrl = yield getZipUrl(dependencyCheckVersion);
                 }
-                tl.rmRF(localInstallPath);
+                cleanLocalInstallPath(localInstallPath);
                 yield unzipFromUrl(zipUrl, tl.resolve('./'));
             }
             // Get dependency check data dir path
@@ -140,6 +140,10 @@ function run() {
         }
         console.log("Ending Dependency Check...");
     });
+}
+function cleanLocalInstallPath(localInstallPath) {
+    let files = tl.findMatch(localInstallPath, ['**', '!data', '!data/**']);
+    files.forEach(file => tl.rmRF(file));
 }
 function getZipUrl(version) {
     return __awaiter(this, void 0, void 0, function* () {
