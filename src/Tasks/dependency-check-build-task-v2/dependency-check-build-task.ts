@@ -44,12 +44,15 @@ async function run() {
         additionalArguments = additionalArguments?.trim();
         localInstallPath = localInstallPath?.trim();
 
-        let testDir = tl.getVariable('Common.TestResultsDirectory');
+        let testDirectory = tl.getVariable('Common.TestResultsDirectory');
 
         // Set reports directory (if necessary)
         if (!reportsDirectory)
-            reportsDirectory = tl.resolve(testDir, 'dependency-check');
+            reportsDirectory = tl.resolve(testDirectory, 'dependency-check');
         console.log(`Setting report directory to ${reportsDirectory}`);
+
+        // Set logs file
+        let logFile = tl.resolve(reportsDirectory, 'log');
 
         // Create report directory (if necessary)
         if (!tl.exist(reportsDirectory!)) {
@@ -66,7 +69,7 @@ async function run() {
 
         // Format types
         let outputTypes = format?.split(',');
-        outputTypes?.forEach(function (outputType) {
+        outputTypes?.forEach(outputType => {
             args += ` --format ${outputType}`;
         });
 
@@ -88,7 +91,7 @@ async function run() {
 
         // Set log switch if requested
         if (enableVerbose)
-            args += ` --log "${tl.resolve(reportsDirectory, 'log')}"`;
+            args += ` --log "${logFile}"`;
 
         // Set additionalArguments
         if (additionalArguments)
@@ -140,10 +143,10 @@ async function run() {
         tl.setVariable('JAVA_OPTS', '-Xss8192k');
 
         // Version smoke test
-        await tl.tool(depCheckPath).arg('--version').exec({ failOnStdErr: true });
+        await tl.tool(depCheckPath).arg('--version').exec();
 
         // Run the scan
-        let exitCode = await tl.tool(depCheckPath).line(args).exec();
+        let exitCode = await tl.tool(depCheckPath).line(args).exec({ failOnStdErr: false, ignoreReturnCode: false });
         console.log(`Dependency Check completed with exit code ${exitCode}.`);
         console.log('Dependency Check reports:');
         console.log(tl.find(reportsDirectory));
@@ -155,9 +158,21 @@ async function run() {
         // Process scan artifacts is required
         let processArtifacts = !failed || isViolation;
         if (processArtifacts) {
-            console.log("Attachments:");
-            let reports = tl.find(reportsDirectory);
-            console.log(reports);
+            console.debug("Attachments:");
+            let reports = tl.findMatch(reportsDirectory, '**/*.*');
+            reports.forEach(filePath => {
+                let fileName = path.basename(filePath).replace('.', '%2E');
+                let fileExt = path.extname(filePath);
+                console.debug(`Attachment name: ${fileName}`);
+                console.debug(`Attachment path: ${filePath}`);
+                console.debug(`Attachment type: ${fileExt}`); 
+                console.log(`##vso[task.addattachment type=dependencycheck-artifact;name=${fileName};]${filePath}`);
+                console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=Dependency Check;]${filePath}`);
+            })
+
+            // Upload logs
+            if (enableVerbose)
+                console.log(`##vso[build.uploadlog]${logFile}`);
         }
 
         if (failed) {

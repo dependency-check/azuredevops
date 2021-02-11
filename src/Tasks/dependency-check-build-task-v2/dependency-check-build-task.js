@@ -51,11 +51,13 @@ function run() {
             reportsDirectory = reportsDirectory === null || reportsDirectory === void 0 ? void 0 : reportsDirectory.trim();
             additionalArguments = additionalArguments === null || additionalArguments === void 0 ? void 0 : additionalArguments.trim();
             localInstallPath = localInstallPath === null || localInstallPath === void 0 ? void 0 : localInstallPath.trim();
-            let testDir = tl.getVariable('Common.TestResultsDirectory');
+            let testDirectory = tl.getVariable('Common.TestResultsDirectory');
             // Set reports directory (if necessary)
             if (!reportsDirectory)
-                reportsDirectory = tl.resolve(testDir, 'dependency-check');
+                reportsDirectory = tl.resolve(testDirectory, 'dependency-check');
             console.log(`Setting report directory to ${reportsDirectory}`);
+            // Set logs file
+            let logFile = tl.resolve(reportsDirectory, 'log');
             // Create report directory (if necessary)
             if (!tl.exist(reportsDirectory)) {
                 console.log(`Creating report directory at ${reportsDirectory}`);
@@ -68,7 +70,7 @@ function run() {
                 args += ` --exclude "${excludePath}"`;
             // Format types
             let outputTypes = format === null || format === void 0 ? void 0 : format.split(',');
-            outputTypes === null || outputTypes === void 0 ? void 0 : outputTypes.forEach(function (outputType) {
+            outputTypes === null || outputTypes === void 0 ? void 0 : outputTypes.forEach(outputType => {
                 args += ` --format ${outputType}`;
             });
             // Fail on CVSS switch
@@ -85,7 +87,7 @@ function run() {
                 args += ' --enableRetired';
             // Set log switch if requested
             if (enableVerbose)
-                args += ` --log "${tl.resolve(reportsDirectory, 'log')}"`;
+                args += ` --log "${logFile}"`;
             // Set additionalArguments
             if (additionalArguments)
                 args += ` ${additionalArguments}`;
@@ -126,9 +128,9 @@ function run() {
             // Set Java args
             tl.setVariable('JAVA_OPTS', '-Xss8192k');
             // Version smoke test
-            yield tl.tool(depCheckPath).arg('--version').exec({ failOnStdErr: true });
+            yield tl.tool(depCheckPath).arg('--version').exec();
             // Run the scan
-            let exitCode = yield tl.tool(depCheckPath).line(args).exec();
+            let exitCode = yield tl.tool(depCheckPath).line(args).exec({ failOnStdErr: false, ignoreReturnCode: false });
             console.log(`Dependency Check completed with exit code ${exitCode}.`);
             console.log('Dependency Check reports:');
             console.log(tl.find(reportsDirectory));
@@ -138,9 +140,20 @@ function run() {
             // Process scan artifacts is required
             let processArtifacts = !failed || isViolation;
             if (processArtifacts) {
-                console.log("Attachments:");
-                let reports = tl.find(reportsDirectory);
-                console.log(reports);
+                console.debug("Attachments:");
+                let reports = tl.findMatch(reportsDirectory, '**/*.*');
+                reports.forEach(filePath => {
+                    let fileName = path.basename(filePath).replace('.', '%2E');
+                    let fileExt = path.extname(filePath);
+                    console.debug(`Attachment name: ${fileName}`);
+                    console.debug(`Attachment path: ${filePath}`);
+                    console.debug(`Attachment type: ${fileExt}`);
+                    console.log(`##vso[task.addattachment type=dependencycheck-artifact;name=${fileName};]${filePath}`);
+                    console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=Dependency Check;]${filePath}`);
+                });
+                // Upload logs
+                if (enableVerbose)
+                    console.log(`##vso[build.uploadlog]${logFile}`);
             }
             if (failed) {
                 let message = "Dependency Check exited with an error code.";
