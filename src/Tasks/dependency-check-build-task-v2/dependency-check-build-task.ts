@@ -44,10 +44,11 @@ async function run() {
         additionalArguments = additionalArguments?.trim();
         localInstallPath = localInstallPath?.trim();
 
+        let sourcesDirectory = tl.getVariable('Build.SourcesDirectory');
         let testDirectory = tl.getVariable('Common.TestResultsDirectory');
 
         // Set reports directory (if necessary)
-        if (!reportsDirectory)
+        if (reportsDirectory == sourcesDirectory)
             reportsDirectory = tl.resolve(testDirectory, 'dependency-check');
         console.log(`Setting report directory to ${reportsDirectory}`);
 
@@ -64,7 +65,7 @@ async function run() {
         let args = `--project "${projectName}" --scan "${scanPath}" --out "${reportsDirectory}"`;
 
         // Exclude switch
-        if (excludePath)
+        if (excludePath != sourcesDirectory)
             args += ` --exclude "${excludePath}"`;
 
         // Format types
@@ -78,7 +79,7 @@ async function run() {
             args += ` --failOnCVSS ${failOnCVSS}`;
 
         // Suppression switch
-        if (suppressionPath)
+        if (suppressionPath != sourcesDirectory)
             args += ` --suppression "${suppressionPath}"`;
 
         // Set enableExperimental option if requested
@@ -98,7 +99,7 @@ async function run() {
             args += ` ${additionalArguments}`;
 
         // Set installation location
-        if (!localInstallPath) {
+        if (localInstallPath == sourcesDirectory) {
             localInstallPath = tl.resolve('./dependency-check');
 
             tl.checkPath(localInstallPath, 'Dependency Check installer');
@@ -149,7 +150,7 @@ async function run() {
         let exitCode = await tl.tool(depCheckPath).line(args).exec({ failOnStdErr: false, ignoreReturnCode: false });
         console.log(`Dependency Check completed with exit code ${exitCode}.`);
         console.log('Dependency Check reports:');
-        console.log(tl.find(reportsDirectory));
+        console.log(tl.findMatch(reportsDirectory, '**/*.*'));
 
         // Process based on exit code
         let failed = exitCode != 0;
@@ -158,14 +159,14 @@ async function run() {
         // Process scan artifacts is required
         let processArtifacts = !failed || isViolation;
         if (processArtifacts) {
-            console.debug("Attachments:");
+            console.log('##[debug]Attachments:');
             let reports = tl.findMatch(reportsDirectory, '**/*.*');
             reports.forEach(filePath => {
                 let fileName = path.basename(filePath).replace('.', '%2E');
                 let fileExt = path.extname(filePath);
-                console.debug(`Attachment name: ${fileName}`);
-                console.debug(`Attachment path: ${filePath}`);
-                console.debug(`Attachment type: ${fileExt}`); 
+                console.log(`##[debug]Attachment name: ${fileName}`);
+                console.log(`##[debug]Attachment path: ${filePath}`);
+                console.log(`##[debug]Attachment type: ${fileExt}`); 
                 console.log(`##vso[task.addattachment type=dependencycheck-artifact;name=${fileName};]${filePath}`);
                 console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=Dependency Check;]${filePath}`);
             })

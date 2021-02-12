@@ -136,7 +136,7 @@
       "type": "string",
       "label": "Installer Version",
       "helpMarkDown": "By default, the build task downloads the installer from the Dependency Check GitHub releases. Setting this field will change the Dependency Check version downloaded onto the build agent.",
-      "defaultValue": "6.0.2",
+      "defaultValue": "latest",
       "required": false
     },
     {
@@ -151,7 +151,7 @@
   "instanceNameFormat": "Dependency Check",
   "execution": {
     "Node": {
-      "target": "$(currentDirectory)\\dependency-check-build-task.js",
+      "target": "$(currentDirectory)/dependency-check-build-task.js",
       "argumentFormat": "",
       "workingDirectory": "$(currentDirectory)"
     }
