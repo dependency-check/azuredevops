@@ -119,7 +119,7 @@
       "name": "localInstallPath",
       "type": "filePath",
       "label": "Local Install Path",
-      "helpMarkDown": "The local path to the `dependency-check` installation directory (on-prem build agents only). Setting this field will run the Dependency Check locally instead of downloading the installer onto the build agent.",
+      "helpMarkDown": "The local path to the `dependency-check` installation directory (on-prem build agents only). Setting this field will run Dependency Check locally instead of downloading the installer onto the build agent.",
       "defaultValue": "",
       "required": false
     },
@@ -135,7 +135,7 @@
       "name": "dependencyCheckVersion",
       "type": "string",
       "label": "Installer Version",
-      "helpMarkDown": "By default, the build task downloads the installer from the Dependency Check GitHub releases. Setting this field will change the Dependency Check version downloaded onto the build agent.",
+      "helpMarkDown": "By default, the build task downloads the latest installer from the Dependency Check GitHub releases. Setting this field will change the Dependency Check version downloaded onto the build agent.",
       "defaultValue": "latest",
       "required": false
     },

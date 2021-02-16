@@ -10,6 +10,10 @@ The OWASP Dependency Check Azure DevOps Extension enables the following features
 
 - Download vulnerability reports from the build's artifacts
 
+## GitHub Repository
+
+The extension maintainers do not monitor the Marketplace Q & A. For questions, issues, or enhancements, please use the [Azure DevOps Dependency Check](https://github.com/dependency-check/azuredevops) repository issues.
+
 ## Installation and Configuration
 
 - Install the [OWASP Dependency Check](https://marketplace.visualstudio.com/items?itemName=dependency-check.dependencycheck) extension into your Azure DevOps Organization.
@@ -66,7 +70,7 @@ More details on configuring and running Dependency Check can be found at [https:
 
 ## Supported Environments
 
-- Azure DevOps Agents must be running a Windows agent with Powershell to execute the build task.
+- The Dependency Check Azure DevOps extension has been converted to TypeScript as of version 6.0. With this update,  both Linux and Windows build agents are supported.
 
 ## Contributors
 
@@ -77,3 +81,5 @@ The following contributor(s) help maintain the Azure DevOps extension:
 - Eric Johnson ([@emjohn20](https://twitter.com/emjohn20)) - Principal Security Engineer, Puma Security
 
 - Even Schjølberg, Upheads
+
+- [Alain Croisetiere](https://github.com/alaincroisetiere)
