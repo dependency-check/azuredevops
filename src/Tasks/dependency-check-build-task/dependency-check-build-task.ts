@@ -10,9 +10,9 @@ const releaseApi = 'https://api.github.com/repos/jeremylong/DependencyCheck/rele
 
 // Install prerequisites : https://docs.microsoft.com/en-us/azure/devops/extend/develop/add-build-task?view=azure-devops#prerequisites
 // To test locally Run:
-// cd ./Tasks/dependency-check-build-task-v2/
+// cd ./Tasks/dependency-check-build-task/
 // npm install
-// tsc
+// npm run build
 // node dependency-check-build-task.js
 
 async function run() {
