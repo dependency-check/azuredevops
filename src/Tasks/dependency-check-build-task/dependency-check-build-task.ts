@@ -20,8 +20,8 @@ async function run() {
     try {
         // Get inputs from build task.
         let projectName: string | undefined = tl.getInput('projectName', true);
-        let scanPath: string | undefined = tl.getInput('scanPath', true);
-        let excludePath: string | undefined = tl.getInput('excludePath');
+        let scanPath: string | undefined = tl.getPathInput('scanPath', true);
+        let excludePath: string | undefined = tl.getPathInput('excludePath');
         let format: string | undefined = tl.getInput('format', true);
         let failOnCVSS: string | undefined = tl.getInput('failOnCVSS');
         let suppressionPath: string | undefined = tl.getPathInput('suppressionPath');
