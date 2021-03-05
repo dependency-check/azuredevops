@@ -4,7 +4,7 @@ Dependency-Check is a software composition analysis utility that identifies proj
 
 The OWASP Dependency Check Azure DevOps Extension enables the following features in an Azure Build Pipeline:
 
-- Software composition analysis runs against package references during each build
+- Software composition analysis runs against package references during build on both Windows and Linux build agents.
 
 - Export vulnerability data to HTML, JSON, XML, CSV, JUnit formatted reports
 
@@ -12,7 +12,7 @@ The OWASP Dependency Check Azure DevOps Extension enables the following features
 
 ## GitHub Repository
 
-The extension maintainers do not monitor the Marketplace Q & A. For questions, issues, or enhancements, please use the [Azure DevOps Dependency Check](https://github.com/dependency-check/azuredevops) repository issues.
+The extension maintainers do not monitor the Marketplace Question & Answers. please use the [Azure DevOps Dependency Check](https://github.com/dependency-check/azuredevops) repository for questions, issues, or enhancements.
 
 ## Installation and Configuration
 
@@ -70,7 +70,7 @@ More details on configuring and running Dependency Check can be found at [https:
 
 ## Supported Environments
 
-- The Dependency Check Azure DevOps extension has been converted to TypeScript as of version 6.0. With this update,  both Linux and Windows build agents are supported.
+- The Dependency Check Azure DevOps extension has been converted to TypeScript as of version 6.0. With this update, both Linux and Windows build agents are supported.
 
 ## Contributors
 
