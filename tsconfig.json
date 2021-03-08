@@ -10,6 +10,6 @@
         ]
     },
     "files": [
-        "src/enhancer/dependencycheck.ts",
+        "src/enhancer/dependencycheck.ts"
     ]
 }

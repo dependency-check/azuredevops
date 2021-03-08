@@ -29,7 +29,11 @@ node_modules
 .vscode
 *.vsix
 
+.taskkey
+
 # Dep check data directory files
-src/Tasks/dependency-check-build-task/dependency-check/data/*.json
-src/Tasks/dependency-check-build-task/dependency-check/data/*.db
-src/Tasks/dependency-check-build-task/dependency-check-*.zip
+src/Tasks/dependency-check-build-task/dependency-check/*
+src/Tasks/dependency-check-build-task/dependency-check/data/*
+src/Tasks/dependency-check-build-task/dependency-check-build-task.js
+!src/Tasks/dependency-check-build-task/dependency-check/data
+!src/Tasks/dependency-check-build-task/dependency-check/data/README.md

@@ -2,13 +2,20 @@
   "name": "dependency-check-build-task",
   "version": "1.0.0",
   "description": "",
-  "main": "dependency-check-build-task.ps1",
+  "main": "dependency-check-build-task.js",
   "scripts": {
-    "install-libs": "npm install"
+    "build": "tsc -p ."
   },
   "author": "Dependency Check",
   "license": "Apache-2.0",
   "dependencies": {
-    "vsts-task-lib": "^2.6.1"
+    "azure-pipelines-task-lib": "^3.0.6-preview.1",
+    "decompress-zip": "^0.3.3",
+    "typed-rest-client": "^1.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.25",
+    "@types/q": "^1.5.4",
+    "typescript": "^4.0.2"
   }
 }
