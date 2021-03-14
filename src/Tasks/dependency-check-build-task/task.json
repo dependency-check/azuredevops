@@ -82,6 +82,14 @@
       "defaultValue": "",
       "required": false,
       "helpMarkDown": "Report output directory. On-prem build agents can specify a local directory to override the default location. The default location is the $COMMON_TESTRESULTSDIRECTORY\\dependency-check directory."
+    },    
+    {
+      "name": "reportFilename",
+      "type": "string",
+      "label": "Report Filename",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Report output filename. Will set the report output name in 'reportsDirectory' to specified filename. Will not work if format is ALL, or multiple formats are supplied to the 'format' parameter. Filename must have an extension or dependency-check will assume it is a path."
     },
     {
       "name": "enableExperimental",

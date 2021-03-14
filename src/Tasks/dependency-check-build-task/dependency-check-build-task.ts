@@ -26,6 +26,7 @@ async function run() {
         let failOnCVSS: string | undefined = tl.getInput('failOnCVSS');
         let suppressionPath: string | undefined = tl.getPathInput('suppressionPath');
         let reportsDirectory: string | undefined = tl.getPathInput('reportsDirectory');
+        let reportFilename: string | undefined = tl.getPathInput('reportFilename');
         let enableExperimental: boolean | undefined = tl.getBoolInput('enableExperimental', true);
         let enableRetired: boolean | undefined = tl.getBoolInput('enableRetired', true);
         let enableVerbose: boolean | undefined = tl.getBoolInput('enableVerbose', true);
@@ -41,6 +42,7 @@ async function run() {
         excludePath = excludePath?.trim();
         suppressionPath = suppressionPath?.trim();
         reportsDirectory = reportsDirectory?.trim();
+        reportFilename = reportFilename?.trim();
         additionalArguments = additionalArguments?.trim();
         localInstallPath = localInstallPath?.trim();
 
@@ -61,8 +63,14 @@ async function run() {
             tl.mkdirP(reportsDirectory!);
         }
 
+        // Set output folder (and filename if supplied)
+        let outField: string = reportsDirectory;
+        if (reportFilename && format?.split(',')?.length === 1 && format != "ALL") {
+            outField = tl.resolve(reportsDirectory, reportFilename);
+        }
+
         // Default args
-        let args = `--project "${projectName}" --scan "${scanPath}" --out "${reportsDirectory}"`;
+        let args = `--project "${projectName}" --scan "${scanPath}" --out "${outField}"`;
 
         // Exclude switch
         if (excludePath != sourcesDirectory)
