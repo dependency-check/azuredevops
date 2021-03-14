@@ -12,7 +12,7 @@ The OWASP Dependency Check Azure DevOps Extension enables the following features
 
 ## GitHub Repository
 
-The extension maintainers do not monitor the Marketplace Question & Answers. please use the [Azure DevOps Dependency Check](https://github.com/dependency-check/azuredevops) repository for questions, issues, or enhancements.
+The extension maintainers do not monitor the Marketplace Question & Answers. Please use the [Azure DevOps Dependency Check](https://github.com/dependency-check/azuredevops) repository for questions, issues, or enhancements.
 
 ## Installation and Configuration
 
