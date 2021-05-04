@@ -135,9 +135,9 @@ async function run() {
             await unzipFromUrl(dataMirror, dataDirectory);
         }
 
-        // Get dependency check script path
-        let depCheck = 'dependency-check.bat';
-        if (tl.osType().match(/^Linux/)) depCheck = 'dependency-check.sh';
+        // Get dependency check script path (.sh file for Linux and Darwin OS)
+        let depCheck = 'dependency-check.sh';
+        if (tl.osType().match(/^Windows/)) depCheck = 'dependency-check.bat';
         let depCheckPath = tl.resolve(localInstallPath, 'bin', depCheck);
         console.log(`Dependency Check script set to ${depCheckPath}`);
 
