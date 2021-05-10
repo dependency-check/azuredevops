@@ -147,7 +147,7 @@ async function run() {
         await tl.tool(depCheckPath).arg('--version').exec();
 
         // Run the scan
-        let exitCode = await tl.tool(depCheckPath).line(args).exec({ failOnStdErr: false, ignoreReturnCode: false });
+        let exitCode = await tl.tool(depCheckPath).line(args).exec({ failOnStdErr: false, ignoreReturnCode: true });
         console.log(`Dependency Check completed with exit code ${exitCode}.`);
         console.log('Dependency Check reports:');
         console.log(tl.findMatch(reportsDirectory, '**/*.*'));
