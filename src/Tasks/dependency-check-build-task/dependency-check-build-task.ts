@@ -212,8 +212,28 @@ async function getZipUrl(version: string): Promise<void> {
 async function unzipFromUrl(zipUrl: string, unzipLocation: string): Promise<void> {
     let fileName = path.basename(url.parse(zipUrl).pathname);
     let zipLocation = tl.resolve(fileName)
-
-    let response = await client.get(zipUrl);
+	let tmpError = null;
+	let response = null;
+	let downloadErrorRetries = 5;
+	
+	do {
+		tmpError = null;
+		try {
+			console.log('Downloading zip from "' + zipUrl + '"...');
+			response = await client.get(zipUrl);
+		}
+		catch(error) {
+			tmpError = error;
+			downloadErrorRetries--;
+			console.error('Error trying to download ZIP (' + (downloadErrorRetries+1) + ' tries left)');
+			console.error(error);
+		}
+	}
+	while(tmpError !== null && downloadErrorRetries >= 0);
+	
+	if(tmpError !== null) {
+		throw tmpError;
+	}
 
     await new Promise<void>(function (resolve, reject) {
         let writer = fs.createWriteStream(zipLocation);
