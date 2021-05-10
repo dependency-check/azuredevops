@@ -26,6 +26,8 @@ async function run() {
         let failOnCVSS: string | undefined = tl.getInput('failOnCVSS');
         let suppressionPath: string | undefined = tl.getPathInput('suppressionPath');
         let reportsDirectory: string | undefined = tl.getPathInput('reportsDirectory');
+		let warnOnCVSSViolation: boolean | undefined = tl.getBoolInput('warnOnCVSSViolation', true);
+		let warnOnToolError: boolean | undefined = tl.getBoolInput('warnOnToolError', true);
         let enableExperimental: boolean | undefined = tl.getBoolInput('enableExperimental', true);
         let enableRetired: boolean | undefined = tl.getBoolInput('enableRetired', true);
         let enableVerbose: boolean | undefined = tl.getBoolInput('enableVerbose', true);
@@ -34,6 +36,7 @@ async function run() {
         let dataMirror: string | undefined = tl.getInput('dataMirror');
         let customRepo: string | undefined = tl.getInput('customRepo');
         let additionalArguments: string | undefined = tl.getInput('additionalArguments');
+		
 
         // Trim the strings
         projectName = projectName?.trim()
@@ -177,11 +180,26 @@ async function run() {
         }
 
         if (failed) {
-            let message = "Dependency Check exited with an error code.";
-            if (isViolation) message = "CVSS threshold violation.";
+            let message = "Dependency Check exited with an error code (" + exitCode + ").";
+			if(isViolation) {
+				message = "CVSS threshold violation.";
+			}
+			
+			if(isViolation && warnOnCVSSViolation) {
+				tl.warning(message);
+				tl.setResult(tl.TaskResult.SucceededWithIssues, message);
+			}
+			else {
+				if(!isViolation && warnOnToolError) {
+					tl.warning(message);
+					tl.setResult(tl.TaskResult.SucceededWithIssues, message);
+				}
+				else {
+					tl.error(message);
+					tl.setResult(tl.TaskResult.Failed, message);
+				}
+			}
 
-            tl.error(message);
-            tl.setResult(tl.TaskResult.Failed, message);
         }
     }
     catch (err) {
