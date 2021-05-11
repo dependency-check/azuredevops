@@ -36,7 +36,7 @@ async function run() {
         let dataMirror: string | undefined = tl.getInput('dataMirror');
         let customRepo: string | undefined = tl.getInput('customRepo');
         let additionalArguments: string | undefined = tl.getInput('additionalArguments');
-		
+		let hasLocalInstallation = true;
 
         // Trim the strings
         projectName = projectName?.trim()
@@ -103,6 +103,7 @@ async function run() {
 
         // Set installation location
         if (localInstallPath == sourcesDirectory) {
+			hasLocalInstallation = false;
             localInstallPath = tl.resolve('./dependency-check');
 
             tl.checkPath(localInstallPath, 'Dependency Check installer');
@@ -149,8 +150,38 @@ async function run() {
         // Version smoke test
         await tl.tool(depCheckPath).arg('--version').exec();
 
+		if(!hasLocalInstallation) {
+			// Remove lock files from potential previous canceled run if no local/centralized installation of tool is used.
+			// We need this because due to a bug the dependency check tool is currently leaving .lock files around if you cancel at the wrong moment.
+			// Since a per-agent installation shouldn't be able to run two scans parallel, we can savely remove all lock files still lying around.
+			console.log('Searching for left over lock files...');
+			let lockFiles = tl.findMatch(localInstallPath, '*.lock', null, { matchBase: true });
+			if(lockFiles.length > 0) {
+				console.log('found ' + lockFiles.length + ' left over lock files, removing them now...');
+				lockFiles.forEach(lockfile => {
+					let fullLockFilePath = tl.resolve(lockfile);
+					try {
+						if(tl.exist(fullLockFilePath)) {
+							console.log('removing lock file "' + fullLockFilePath + '"...');
+							tl.rmRF(fullLockFilePath);
+						}
+						else {
+							console.log('found lock file "' + fullLockFilePath + '" doesn\'t exist, that was unexpected');
+						}
+					}
+					catch (err) {
+						console.log('could not delete lock file "' + fullLockFilePath + '"!');
+						console.error(err);
+					}
+				});
+			}
+			else {
+				console.log('found no left over lock files, continuing...');
+			}
+		}
+
         // Run the scan
-        let exitCode = await tl.tool(depCheckPath).line(args).exec({ failOnStdErr: false, ignoreReturnCode: true });
+		let exitCode = await tl.tool(depCheckPath).line(args).exec({ failOnStdErr: false, ignoreReturnCode: true });
         console.log(`Dependency Check completed with exit code ${exitCode}.`);
         console.log('Dependency Check reports:');
         console.log(tl.findMatch(reportsDirectory, '**/*.*'));
