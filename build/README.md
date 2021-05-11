@@ -4,7 +4,17 @@ Let's start with this: We can automate this with a pipeline later and eliminate 
 
 Start by making your changes to the extension. When you are ready to test and release, use the steps below.
 
-## Build Task Version
+## PowerShell Core building
+
+The simplest way to create a new vsix package for development or production environment is to use the ./build/Build-Extension.ps1 PowerShell Core script (PowerShell Core needs to be installed for this script to work).
+
+Just call it via `pwsh ./build/Build-Extension.ps1 -BuildVersion "6.1.0.0" -BuildEnvironment "Release"` and replace the -BuildVersion string with the new version number and use "Release" as BuildEnvironment for production and "Development" as BuildEnvironment for development.
+
+After the call the new VSIX file should have been created in the repository root directory.
+
+## Manual building
+
+### Build Task Version
 
 To release a new version, start by opening the *src/Tasks/dependency-check-build-task/task.json* file. Bump the version number. Keep the major and minor versions in sync with the core Dependency Check CLI. The patch release has to be updated every time you want to change the extension. Even in development. Think of it like a build number. Azure won't update the build task during an update if this value is the same as the currently installed build task in a pipeline. So, we put some 0's on th end to tell us what version of Dependency Check we are using, as well as the build id of the extension itself. Example 5.1.1 = 5.1.\[1000-1999\].
 
@@ -16,7 +26,7 @@ To release a new version, start by opening the *src/Tasks/dependency-check-build
 },
 ```
 
-## Building for DEV
+### Building for DEV
 
 Open the **package.json** file and modify the package line:
 
@@ -58,7 +68,7 @@ dependency-check.azuredevops-dev-5.2.0.000.vsix
 
 Upload the the marketplace manually (for now until the release pipeline works)
 
-## Build for PROD
+### Build for PROD
 
 Open the **package.json** file and update the package command to the prod value:
 
