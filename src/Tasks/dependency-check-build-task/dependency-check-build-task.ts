@@ -193,14 +193,14 @@ async function run() {
         // Process scan artifacts is required
         let processArtifacts = !failed || isViolation;
         if (processArtifacts) {
-            console.log('##[debug]Attachments:');
+            logDebug('Attachments:');
             let reports = tl.findMatch(reportsDirectory, '**/*.*');
             reports.forEach(filePath => {
                 let fileName = path.basename(filePath).replace('.', '%2E');
                 let fileExt = path.extname(filePath);
-                console.log(`##[debug]Attachment name: ${fileName}`);
-                console.log(`##[debug]Attachment path: ${filePath}`);
-                console.log(`##[debug]Attachment type: ${fileExt}`); 
+                logDebug(`Attachment name: ${fileName}`);
+                logDebug(`Attachment path: ${filePath}`);
+                logDebug(`Attachment type: ${fileExt}`); 
                 console.log(`##vso[task.addattachment type=dependencycheck-artifact;name=${fileName};]${filePath}`);
                 console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=Dependency Check;]${filePath}`);
             })
@@ -261,6 +261,18 @@ async function run() {
     console.log("Ending Dependency Check...");
 }
 
+function logDebug(message: string) {
+    if(message !== null) {
+        let varSystemDebug = tl.getVariable('system.debug');
+
+        if(typeof varSystemDebug === 'string') {
+            if(varSystemDebug.toLowerCase() == 'true') {
+                console.log('##[debug]' + message)
+            }
+        }    
+    }
+}
+
 function cleanLocalInstallPath(localInstallPath: string) {
     let files = tl.findMatch(localInstallPath, ['**', '!data', '!data/**']);
     files.forEach(file => tl.rmRF(file));
@@ -287,8 +299,9 @@ async function unzipFromUrl(zipUrl: string, unzipLocation: string): Promise<void
 	do {
 		tmpError = null;
 		try {
-			await console.log('Downloading zip from "' + zipUrl + '"...');
+			await console.log('Downloading ZIP from "' + zipUrl + '"...');
 			response = await client.get(zipUrl);
+			await logDebug('done downloading');
 		}
 		catch(error) {
 			tmpError = error;
@@ -303,6 +316,8 @@ async function unzipFromUrl(zipUrl: string, unzipLocation: string): Promise<void
 		throw tmpError;
 	}
 
+    await logDebug('Download was successful, saving downloaded ZIP file...');
+
     await new Promise<void>(function (resolve, reject) {
         let writer = fs.createWriteStream(zipLocation);
         writer.on('error', err => reject(err));
@@ -310,8 +325,15 @@ async function unzipFromUrl(zipUrl: string, unzipLocation: string): Promise<void
         response.message.pipe(writer);
     });
 
+    await logDebug('Downloaded ZIP file has been saved, unzipping now...');
+
     await unzipFromFile(zipLocation, unzipLocation);
+
+    await logDebug('Unzipping complete, removing ZIP file now...');
+
     tl.rmRF(zipLocation);
+
+    await logDebug('ZIP file has been removed');
 }
 
 async function unzipFromFile(zipLocation: string, unzipLocation: string): Promise<void> {
