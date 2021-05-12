@@ -27,7 +27,6 @@ async function run() {
         let suppressionPath: string | undefined = tl.getPathInput('suppressionPath');
         let reportsDirectory: string | undefined = tl.getPathInput('reportsDirectory');
 		let warnOnCVSSViolation: boolean | undefined = tl.getBoolInput('warnOnCVSSViolation', true);
-		let warnOnToolError: boolean | undefined = tl.getBoolInput('warnOnToolError', true);
         let enableExperimental: boolean | undefined = tl.getBoolInput('enableExperimental', true);
         let enableRetired: boolean | undefined = tl.getBoolInput('enableRetired', true);
         let enableVerbose: boolean | undefined = tl.getBoolInput('enableVerbose', true);
@@ -225,13 +224,7 @@ async function run() {
 			}
             else {
                 message = "Dependency Check exited with an error code (exit code: " + exitCode + ")."
-
-                if(warnOnToolError) {
-                    result = tl.TaskResult.SucceededWithIssues
-                }
-                else {
-                    result = tl.TaskResult.Failed
-                }
+                result = tl.TaskResult.Failed
             }
         }
 
