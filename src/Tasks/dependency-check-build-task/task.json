@@ -86,10 +86,10 @@
     {
       "name": "warnOnCVSSViolation",
       "type": "boolean",
-      "label": "Only warnings for found violations",
+      "label": "Only warn for found violations",
       "defaultValue": "false",
       "required": false,
-      "helpMarkDown": "Will only warn for found violations above the CVSS failure threshold instead of throwing errors, and the build step will succeed-with-issues. This ensures that even if violations were found, the pipeline will not be stopped."
+      "helpMarkDown": "Will only warn for found violations above the CVSS failure threshold instead of throwing an error. This build step will then succeed with issues instead of failing."
     },
     {
       "name": "enableExperimental",
