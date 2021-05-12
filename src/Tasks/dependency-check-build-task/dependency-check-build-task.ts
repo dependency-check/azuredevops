@@ -210,28 +210,47 @@ async function run() {
                 console.log(`##vso[build.uploadlog]${logFile}`);
         }
 
+        let message = "Dependency Check succeeded"
+        let result = tl.TaskResult.Succeeded
         if (failed) {
-            let message = "Dependency Check exited with an error code (" + exitCode + ").";
 			if(isViolation) {
 				message = "CVSS threshold violation.";
-			}
-			
-			if(isViolation && warnOnCVSSViolation) {
-				tl.warning(message);
-				tl.setResult(tl.TaskResult.SucceededWithIssues, message);
-			}
-			else {
-				if(!isViolation && warnOnToolError) {
-					tl.warning(message);
-					tl.setResult(tl.TaskResult.SucceededWithIssues, message);
-				}
-				else {
-					tl.error(message);
-					tl.setResult(tl.TaskResult.Failed, message);
-				}
-			}
 
+                if(warnOnCVSSViolation) {
+                    result = tl.TaskResult.SucceededWithIssues
+                }
+                else {
+                    result = tl.TaskResult.Failed
+                }
+			}
+            else {
+                message = "Dependency Check exited with an error code (exit code: " + exitCode + ")."
+
+                if(warnOnToolError) {
+                    result = tl.TaskResult.SucceededWithIssues
+                }
+                else {
+                    result = tl.TaskResult.Failed
+                }
+            }
         }
+
+        let consoleMessage = 'Dependency Check ';
+        switch(result) {
+            case tl.TaskResult.Succeeded:
+                consoleMessage += 'succeeded'
+                break;
+            case tl.TaskResult.SucceededWithIssues:
+                consoleMessage += 'succeeded with issues'
+                break;
+            case tl.TaskResult.Failed:
+                consoleMessage += 'failed'
+                break;
+        }
+        consoleMessage += ' with message "' + message + '"'
+        console.log(consoleMessage);
+
+        tl.setResult(result, message);
     }
     catch (err) {
         console.log(err.message);
@@ -268,14 +287,14 @@ async function unzipFromUrl(zipUrl: string, unzipLocation: string): Promise<void
 	do {
 		tmpError = null;
 		try {
-			console.log('Downloading zip from "' + zipUrl + '"...');
+			await console.log('Downloading zip from "' + zipUrl + '"...');
 			response = await client.get(zipUrl);
 		}
 		catch(error) {
 			tmpError = error;
 			downloadErrorRetries--;
-			console.error('Error trying to download ZIP (' + (downloadErrorRetries+1) + ' tries left)');
-			console.error(error);
+			await console.error('Error trying to download ZIP (' + (downloadErrorRetries+1) + ' tries left)');
+			await console.error(error);
 		}
 	}
 	while(tmpError !== null && downloadErrorRetries >= 0);
