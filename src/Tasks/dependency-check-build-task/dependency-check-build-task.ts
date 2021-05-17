@@ -27,6 +27,7 @@ async function run() {
         let suppressionPath: string | undefined = tl.getPathInput('suppressionPath');
         let reportsDirectory: string | undefined = tl.getPathInput('reportsDirectory');
         let warnOnCVSSViolation: boolean | undefined = tl.getBoolInput('warnOnCVSSViolation', true);
+        let reportFilename: string | undefined = tl.getPathInput('reportFilename');
         let enableExperimental: boolean | undefined = tl.getBoolInput('enableExperimental', true);
         let enableRetired: boolean | undefined = tl.getBoolInput('enableRetired', true);
         let enableVerbose: boolean | undefined = tl.getBoolInput('enableVerbose', true);
@@ -43,6 +44,7 @@ async function run() {
         excludePath = excludePath?.trim();
         suppressionPath = suppressionPath?.trim();
         reportsDirectory = reportsDirectory?.trim();
+        reportFilename = reportFilename?.trim();
         additionalArguments = additionalArguments?.trim();
         localInstallPath = localInstallPath?.trim();
 
@@ -63,8 +65,14 @@ async function run() {
             tl.mkdirP(reportsDirectory!);
         }
 
+        // Set output folder (and filename if supplied)
+        let outField: string = reportsDirectory;
+        if (reportFilename && format?.split(',')?.length === 1 && format != "ALL") {
+            outField = tl.resolve(reportsDirectory, reportFilename);
+        }
+
         // Default args
-        let args = `--project "${projectName}" --scan "${scanPath}" --out "${reportsDirectory}"`;
+        let args = `--project "${projectName}" --scan "${scanPath}" --out "${outField}"`;
 
         // Exclude switch
         if (excludePath != sourcesDirectory)
@@ -130,9 +138,9 @@ async function run() {
             await unzipFromUrl(dataMirror, dataDirectory);
         }
 
-        // Get dependency check script path
-        let depCheck = 'dependency-check.bat';
-        if (tl.osType().match(/^Linux/)) depCheck = 'dependency-check.sh';
+        // Get dependency check script path (.sh file for Linux and Darwin OS)
+        let depCheck = 'dependency-check.sh';
+        if (tl.osType().match(/^Windows/)) depCheck = 'dependency-check.bat';
         let depCheckPath = tl.resolve(localInstallPath, 'bin', depCheck);
         console.log(`Dependency Check script set to ${depCheckPath}`);
 
