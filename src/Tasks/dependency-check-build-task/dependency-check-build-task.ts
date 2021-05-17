@@ -26,6 +26,7 @@ async function run() {
         let failOnCVSS: string | undefined = tl.getInput('failOnCVSS');
         let suppressionPath: string | undefined = tl.getPathInput('suppressionPath');
         let reportsDirectory: string | undefined = tl.getPathInput('reportsDirectory');
+        let warnOnCVSSViolation: boolean | undefined = tl.getBoolInput('warnOnCVSSViolation', true);
         let reportFilename: string | undefined = tl.getPathInput('reportFilename');
         let enableExperimental: boolean | undefined = tl.getBoolInput('enableExperimental', true);
         let enableRetired: boolean | undefined = tl.getBoolInput('enableRetired', true);
@@ -35,6 +36,7 @@ async function run() {
         let dataMirror: string | undefined = tl.getInput('dataMirror');
         let customRepo: string | undefined = tl.getInput('customRepo');
         let additionalArguments: string | undefined = tl.getInput('additionalArguments');
+        let hasLocalInstallation = true;
 
         // Trim the strings
         projectName = projectName?.trim()
@@ -108,6 +110,7 @@ async function run() {
 
         // Set installation location
         if (localInstallPath == sourcesDirectory) {
+            hasLocalInstallation = false;
             localInstallPath = tl.resolve('./dependency-check');
 
             tl.checkPath(localInstallPath, 'Dependency Check installer');
@@ -154,8 +157,38 @@ async function run() {
         // Version smoke test
         await tl.tool(depCheckPath).arg('--version').exec();
 
+        if(!hasLocalInstallation) {
+            // Remove lock files from potential previous canceled run if no local/centralized installation of tool is used.
+            // We need this because due to a bug the dependency check tool is currently leaving .lock files around if you cancel at the wrong moment.
+            // Since a per-agent installation shouldn't be able to run two scans parallel, we can savely remove all lock files still lying around.
+            console.log('Searching for left over lock files...');
+            let lockFiles = tl.findMatch(localInstallPath, '*.lock', null, { matchBase: true });
+            if(lockFiles.length > 0) {
+                console.log('found ' + lockFiles.length + ' left over lock files, removing them now...');
+                lockFiles.forEach(lockfile => {
+                    let fullLockFilePath = tl.resolve(lockfile);
+                    try {
+                        if(tl.exist(fullLockFilePath)) {
+                            console.log('removing lock file "' + fullLockFilePath + '"...');
+                            tl.rmRF(fullLockFilePath);
+                        }
+                        else {
+                            console.log('found lock file "' + fullLockFilePath + '" doesn\'t exist, that was unexpected');
+                        }
+                    }
+                    catch (err) {
+                        console.log('could not delete lock file "' + fullLockFilePath + '"!');
+                        console.error(err);
+                    }
+                });
+            }
+            else {
+                console.log('found no left over lock files, continuing...');
+            }
+        }
+
         // Run the scan
-        let exitCode = await tl.tool(depCheckPath).line(args).exec({ failOnStdErr: false, ignoreReturnCode: false });
+        let exitCode = await tl.tool(depCheckPath).line(args).exec({ failOnStdErr: false, ignoreReturnCode: true });
         console.log(`Dependency Check completed with exit code ${exitCode}.`);
         console.log('Dependency Check reports:');
         console.log(tl.findMatch(reportsDirectory, '**/*.*'));
@@ -167,14 +200,14 @@ async function run() {
         // Process scan artifacts is required
         let processArtifacts = !failed || isViolation;
         if (processArtifacts) {
-            console.log('##[debug]Attachments:');
+            logDebug('Attachments:');
             let reports = tl.findMatch(reportsDirectory, '**/*.*');
             reports.forEach(filePath => {
                 let fileName = path.basename(filePath).replace('.', '%2E');
                 let fileExt = path.extname(filePath);
-                console.log(`##[debug]Attachment name: ${fileName}`);
-                console.log(`##[debug]Attachment path: ${filePath}`);
-                console.log(`##[debug]Attachment type: ${fileExt}`); 
+                logDebug(`Attachment name: ${fileName}`);
+                logDebug(`Attachment path: ${filePath}`);
+                logDebug(`Attachment type: ${fileExt}`); 
                 console.log(`##vso[task.addattachment type=dependencycheck-artifact;name=${fileName};]${filePath}`);
                 console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=Dependency Check;]${filePath}`);
             })
@@ -184,13 +217,41 @@ async function run() {
                 console.log(`##vso[build.uploadlog]${logFile}`);
         }
 
+        let message = "Dependency Check succeeded"
+        let result = tl.TaskResult.Succeeded
         if (failed) {
-            let message = "Dependency Check exited with an error code.";
-            if (isViolation) message = "CVSS threshold violation.";
+            if(isViolation) {
+                message = "CVSS threshold violation.";
 
-            tl.error(message);
-            tl.setResult(tl.TaskResult.Failed, message);
+                if(warnOnCVSSViolation) {
+                    result = tl.TaskResult.SucceededWithIssues
+                }
+                else {
+                    result = tl.TaskResult.Failed
+                }
+            }
+            else {
+                message = "Dependency Check exited with an error code (exit code: " + exitCode + ")."
+                result = tl.TaskResult.Failed
+            }
         }
+
+        let consoleMessage = 'Dependency Check ';
+        switch(result) {
+            case tl.TaskResult.Succeeded:
+                consoleMessage += 'succeeded'
+                break;
+            case tl.TaskResult.SucceededWithIssues:
+                consoleMessage += 'succeeded with issues'
+                break;
+            case tl.TaskResult.Failed:
+                consoleMessage += 'failed'
+                break;
+        }
+        consoleMessage += ' with message "' + message + '"'
+        console.log(consoleMessage);
+
+        tl.setResult(result, message);
     }
     catch (err) {
         console.log(err.message);
@@ -199,6 +260,18 @@ async function run() {
     }
 
     console.log("Ending Dependency Check...");
+}
+
+function logDebug(message: string) {
+    if(message !== null) {
+        let varSystemDebug = tl.getVariable('system.debug');
+
+        if(typeof varSystemDebug === 'string') {
+            if(varSystemDebug.toLowerCase() == 'true') {
+                console.log('##[debug]' + message)
+            }
+        }    
+    }
 }
 
 function cleanLocalInstallPath(localInstallPath: string) {
@@ -220,8 +293,31 @@ async function getZipUrl(version: string): Promise<void> {
 async function unzipFromUrl(zipUrl: string, unzipLocation: string): Promise<void> {
     let fileName = path.basename(url.parse(zipUrl).pathname);
     let zipLocation = tl.resolve(fileName)
+    let tmpError = null;
+    let response = null;
+    let downloadErrorRetries = 5;
+    
+    do {
+        tmpError = null;
+        try {
+            await console.log('Downloading ZIP from "' + zipUrl + '"...');
+            response = await client.get(zipUrl);
+            await logDebug('done downloading');
+        }
+        catch(error) {
+            tmpError = error;
+            downloadErrorRetries--;
+            await console.error('Error trying to download ZIP (' + (downloadErrorRetries+1) + ' tries left)');
+            await console.error(error);
+        }
+    }
+    while(tmpError !== null && downloadErrorRetries >= 0);
+    
+    if(tmpError !== null) {
+        throw tmpError;
+    }
 
-    let response = await client.get(zipUrl);
+    await logDebug('Download was successful, saving downloaded ZIP file...');
 
     await new Promise<void>(function (resolve, reject) {
         let writer = fs.createWriteStream(zipLocation);
@@ -230,8 +326,15 @@ async function unzipFromUrl(zipUrl: string, unzipLocation: string): Promise<void
         response.message.pipe(writer);
     });
 
+    await logDebug('Downloaded ZIP file has been saved, unzipping now...');
+
     await unzipFromFile(zipLocation, unzipLocation);
+
+    await logDebug('Unzipping complete, removing ZIP file now...');
+
     tl.rmRF(zipLocation);
+
+    await logDebug('ZIP file has been removed');
 }
 
 async function unzipFromFile(zipLocation: string, unzipLocation: string): Promise<void> {
