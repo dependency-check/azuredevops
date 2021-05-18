@@ -82,6 +82,22 @@
       "defaultValue": "",
       "required": false,
       "helpMarkDown": "Report output directory. On-prem build agents can specify a local directory to override the default location. The default location is the $COMMON_TESTRESULTSDIRECTORY\\dependency-check directory."
+    },    
+    {
+      "name": "reportFilename",
+      "type": "string",
+      "label": "Report Filename",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Report output filename. Will set the report output name in 'reportsDirectory' to specified filename. Will not work if format is ALL, or multiple formats are supplied to the 'format' parameter. Filename must have an extension or dependency-check will assume it is a path."
+    },
+    {
+      "name": "warnOnCVSSViolation",
+      "type": "boolean",
+      "label": "Only warn for found violations",
+      "defaultValue": "false",
+      "required": false,
+      "helpMarkDown": "Will only warn for found violations above the CVSS failure threshold instead of throwing an error. This build step will then succeed with issues instead of failing."
     },
     {
       "name": "enableExperimental",
