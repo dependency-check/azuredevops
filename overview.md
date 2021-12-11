@@ -6,7 +6,7 @@ The OWASP Dependency Check Azure DevOps Extension enables the following features
 
 - Software composition analysis runs against package references during build on both Windows and Linux build agents.
 
-- Export vulnerability data to HTML, JSON, XML, CSV, JUnit formatted reports
+- Export vulnerability data to HTML, JSON, XML, CSV, JUnit, Sarif formatted reports
 
 - Download vulnerability reports from the build's artifacts
 
@@ -63,6 +63,10 @@ The extension maintainers do not monitor the Marketplace Question & Answers. Ple
 - View the **Tests** screen to view the passing and failing Dependency Check tests.
 
     <img src="https://raw.githubusercontent.com/dependency-check/azuredevops/main/screenshots/build-tests.png">
+
+## SARIF display in Summary
+
+You can display the dependency check report nicely in your Pipeline run summary. To realize it set `format` to `sarif` and make sure your Azure DevOps organization has [SARIF SAST Scans Tab](https://marketplace.visualstudio.com/items?itemName=sariftools.scans) extension installed.
 
 ## Learn More
 

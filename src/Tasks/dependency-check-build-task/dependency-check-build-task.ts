@@ -207,9 +207,14 @@ async function run() {
                 let fileExt = path.extname(filePath);
                 logDebug(`Attachment name: ${fileName}`);
                 logDebug(`Attachment path: ${filePath}`);
-                logDebug(`Attachment type: ${fileExt}`); 
+                logDebug(`Attachment type: ${fileExt}`);
+                let artifactName = 'Dependency Check'
+
+                if (fileExt ==='SARIF') {
+                    artifactName = 'CodeAnalysisLogs'
+                }
                 console.log(`##vso[task.addattachment type=dependencycheck-artifact;name=${fileName};]${filePath}`);
-                console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=Dependency Check;]${filePath}`);
+                console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=${artifactName};]${filePath}`);                
             })
 
             // Upload logs

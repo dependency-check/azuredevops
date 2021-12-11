@@ -45,7 +45,7 @@
       "label": "Report Format",
       "defaultValue": "HTML",
       "required": true,
-      "helpMarkDown": "The output format to write to (XML, HTML, CSV, JSON, JUNIT, ALL). Multiple formats can be selected. The default is HTML.",
+      "helpMarkDown": "The output format to write to (XML, HTML, CSV, JSON, JUNIT, SARIF, ALL). Multiple formats can be selected. The default is HTML.",
       "properties": {
         "EditableOptions": "False",
         "MultiSelectFlatList": "True"
@@ -56,6 +56,7 @@
         "CSV": "CSV",
         "JSON": "JSON",
         "JUNIT": "JUNIT",
+        "SARIF": "SARIF",
         "ALL": "ALL"
       }
     },
