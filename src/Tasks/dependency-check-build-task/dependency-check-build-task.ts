@@ -208,13 +208,14 @@ async function run() {
                 logDebug(`Attachment name: ${fileName}`);
                 logDebug(`Attachment path: ${filePath}`);
                 logDebug(`Attachment type: ${fileExt}`);
-                let artifactName = 'Dependency Check'
 
-                if (fileExt.toUpperCase() ==='SARIF') {
-                    artifactName = 'CodeAnalysisLogs';
-                }
                 console.log(`##vso[task.addattachment type=dependencycheck-artifact;name=${fileName};]${filePath}`);
-                console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=${artifactName};]${filePath}`);                
+                console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=Dependency Check;]${filePath}`);                
+
+                // To display the SARIF report in Azure DevOps with the SARIF SAST Scans Tab extension, the report must me in the CodeAnalysisLogs artifact 
+                if (fileExt.toUpperCase() ==='SARIF') {
+                    console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=CodeAnalysisLogs;]${filePath}`);   
+                }
             })
 
             // Upload logs
