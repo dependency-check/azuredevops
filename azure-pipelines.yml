@@ -22,7 +22,7 @@ stages:
   - job: 
     steps:
     - checkout: self
-      fetchDepth: 5
+      fetchDepth: 2
     - task: NodeTool@0
       inputs:
         versionSpec: '16.x'
@@ -99,6 +99,7 @@ stages:
               updateTasksVersion: true
               extensionVisibility: 'privatepreview'
               shareWith: $(shareWith)
+              extensionVersion: '$(Build.BuildNumber)'
               noWaitValidation: true
 
 - stage: Production
@@ -128,6 +129,7 @@ stages:
                 publisherId: $(publisher)
                 extensionId: $(extensionId)
                 extensionName: $(extensionName)
+                extensionVersion: '$(Build.BuildNumber)'
                 updateTasksVersion: true
                 extensionVisibility: 'public'
                 noWaitValidation:  true
