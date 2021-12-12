@@ -168,7 +168,6 @@
   "execution": {
     "Node10": {
       "target": "$(currentDirectory)/dependency-check-build-task.js",
-      "argumentFormat": "",
       "workingDirectory": "$(currentDirectory)"
     }
   }

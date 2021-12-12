@@ -93,14 +93,13 @@ stages:
               fileType: 'vsix'
               vsixFile: '$(Pipeline.Workspace)/vsix/$(extensionFileName)'
               publisherId: $(publisher)
-              extensionId: $(extensionId)-dev
+              extensionId: $(extensionId)
               extensionName: $(extensionName) - DEV
               extensionTag: '-dev'
               updateTasksVersion: true
               extensionVisibility: 'privatepreview'
               shareWith: $(shareWith)
               extensionVersion: '$(Build.BuildNumber)'
-              noWaitValidation: true
 
 - stage: Production
   displayName: 'Publish to Marketplace (Public)'
@@ -132,5 +131,4 @@ stages:
                 extensionVersion: '$(Build.BuildNumber)'
                 updateTasksVersion: true
                 extensionVisibility: 'public'
-                noWaitValidation:  true
               

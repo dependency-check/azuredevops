@@ -2,3 +2,9 @@
     "id":  "47EA1F4A-57BA-414A-B12E-C44F42765E72",
 - enable prod build
 
+
+- Automated the build process:
+ - Create a public Azure DevOps project
+ - Authorize Azure DevOps project to use this git repository
+ - Update azure-pipelines.yml and set variable 'shareWith'. This is the Azure DevOps organisation to run your tests installations from
+- Removed manual build steps
