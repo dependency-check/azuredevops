@@ -1,16 +1,15 @@
 {
-  "id": "[task id]",
-  "name": "[task name]",
-  "friendlyName": "OWASP Dependency Check",
+  "id":  "47EA1F4A-57BA-414A-B12E-C44F42765E72",
+  "name":  "dependency-check-build-task",
+  "friendlyName":  "OWASP Dependency Check",
   "description": "Dependency Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project's dependencies.",
-  "helpMarkDown": "[More Information](https://jeremylong.github.io/DependencyCheck/index.html)",
+  "helpMarkDown": "[More Information](https://github.com/dependency-check/azuredevops)",
   "category": "Build",
-  "visibility": [ "Build" ],
   "author": "Dependency Check",
   "version": {
-    "Major": "[major]",
-    "Minor": "[minor]",
-    "Patch": "[patchrev]"
+    "Major": "6",
+    "Minor": "1",
+    "Patch": "0"
   },
   "demands": [],
   "minimumAgentVersion": "2.0.0",
@@ -167,7 +166,7 @@
   ],
   "instanceNameFormat": "Dependency Check",
   "execution": {
-    "Node": {
+    "Node10": {
       "target": "$(currentDirectory)/dependency-check-build-task.js",
       "argumentFormat": "",
       "workingDirectory": "$(currentDirectory)"

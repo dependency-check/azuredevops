@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "dependencycheck",
-  "version": "[version]",
+  "version": "1.0.0",
   "name": "OWASP Dependency Check",
   "public": true,
   "scopes": [
@@ -9,9 +9,6 @@
   ],
   "description": "Dependency Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project's dependencies.",
   "publisher": "dependency-check",
-  "galleryFlags": [
-    "Public"
-  ],
   "licensing": {
     "overrides": [
       {
@@ -63,14 +60,20 @@
       "path": "license.md"
     }
   },
+  
   "links": {
     "getstarted": {
       "uri": "https://jeremylong.github.io/DependencyCheck/index.html"
     },
     "support": {
-      "uri": "https://github.com/jeremylong/DependencyCheck"
+      "uri": "https://github.com/dependency-check/azuredevops"
     }
+
   },
+  "repository": {
+    "type": "git",
+    "uri": "https://github.com/dependency-check/azuredevops"
+},
   "branding": {
     "color": "rgb(255, 255, 255)",
     "theme": "light"
@@ -81,19 +84,9 @@
       "addressable": true
     },
     {
-      "path": "dist",
-      "addressable": true,
-      "packagePath": "scripts"
-    },
-    {
       "path": "src/Tasks",
       "addressable": true,
       "packagePath": "Tasks"
-    },
-    {
-      "path": "node_modules/vss-web-extension-sdk/lib",
-      "addressable": true,
-      "packagePath": "lib"
     }
   ],
   "contributions": [

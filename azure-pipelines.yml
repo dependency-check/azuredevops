@@ -1,0 +1,132 @@
+name: '6.1$(rev:.r)'
+
+trigger:
+- main
+- feature/*
+- features/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  publisher: 'foxholenl'                  #'dependency-check'
+  extensionId: 'dependencycheck'
+  extensionName: 'OWASP Dependency Check'
+  extensionFileName: 'dependency-check.vsix'
+  shareWith: 'foxholenl'
+
+stages:
+- stage: 'Build'
+  displayName: 'Build'
+  jobs:
+  - job: 
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '16.x'
+      displayName: 'Install Node.js'
+    
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: 'cd src/Tasks/dependency-check-build-task && npm install --production'
+      displayName: 'Run NPM Install'
+
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: 'cd src/Tasks/dependency-check-build-task && npm run build'
+      displayName: 'Run Typescript compile'
+  
+    - task: TfxInstaller@3
+      displayName: 'Use Node CLI for Azure DevOps'
+      inputs:
+        version: '0.9.x'
+        checkLatest: true
+
+    - task: PackageAzureDevOpsExtension@3
+      displayName: 'Package Extension: $(Build.SourcesDirectory)'
+      name: 'packageStep'
+      inputs:
+        rootFolder: '$(Build.SourcesDirectory)'
+        outputPath: '$(Build.ArtifactStagingDirectory)/dependency-check.vsix'
+        publisherId: $(publisher)
+        extensionId: $(extensionName)
+        extensionName: $(extensionName)
+        extensionTag: '-build'
+        extensionVersion: '$(Build.BuildNumber)'
+        extensionVisibility: private
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish vsix'
+      inputs:
+        publishLocation: pipeline
+        targetPath: '$(packageStep.Extension.OutputPath)'
+        artifact: 'vsix'
+      condition: succeededOrFailed()
+
+- stage: Test
+  displayName: 'Publish to Marketplace (private)'
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  dependsOn: 'Build'
+  jobs:
+    - deployment: 
+      environment: Test
+      strategy: 
+        runOnce:
+         deploy:
+          steps:
+
+          - task: TfxInstaller@3
+            displayName: 'Use Node CLI for Azure DevOps'
+            inputs:
+              version: '0.9.x'
+              checkLatest: true
+
+          - task: PublishAzureDevOpsExtension@3
+            name: 'PublishTest'
+            inputs:
+              connectTo: 'VsTeam'
+              connectedServiceName: 'Marketplace'
+              fileType: 'vsix'
+              vsixFile: '$(Pipeline.Workspace)/vsix/$(extensionFileName)'
+              publisherId: $(publisher)
+              extensionId: $(extensionId)-dev
+              extensionName: $(extensionName) - DEV
+              extensionTag: '-dev'
+              updateTasksVersion: true
+              extensionVisibility: 'privatepreview'
+              shareWith: $(shareWith)
+              noWaitValidation: true
+
+- stage: Production
+  displayName: 'Publish to Marketplace (Public)'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  dependsOn: 'Test'
+  jobs:
+    - deployment: 
+      environment: Production
+      strategy: 
+        runOnce:
+          deploy:
+            steps:
+            - task: TfxInstaller@3
+              displayName: 'Use Node CLI for Azure DevOps'
+              inputs:
+                version: '0.9.x'
+                checkLatest: true
+
+            - task: PublishAzureDevOpsExtension@3
+              name: 'PublishProd'
+              inputs:
+                connectTo: 'VsTeam'
+                connectedServiceName: 'Marketplace'
+                fileType: 'vsix'
+                vsixFile: '$(Pipeline.Workspace)/vsix/$(extensionFileName).vsix'
+                publisherId: $(publisher)
+                extensionId: $(extensionName)
+                extensionName: $(extensionName)
+                updateTasksVersion: true
+                extensionVisibility: 'public'
+                noWaitValidation:  true
+              
