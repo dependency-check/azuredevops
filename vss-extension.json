@@ -84,9 +84,7 @@
       "addressable": true
     },
     {
-      "path": "src/Tasks",
-      "addressable": true,
-      "packagePath": "Tasks"
+      "path": "src/Tasks"
     }
   ],
   "contributions": [
@@ -97,7 +95,7 @@
       ],
       "type": "ms.vss-distributed-task.task",
       "properties": {
-        "name": "Tasks/dependency-check-build-task"
+        "name": "Tasks"
       }
     }
   ]
