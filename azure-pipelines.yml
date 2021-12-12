@@ -32,7 +32,7 @@ stages:
       inputs:
         targetType: 'inline'
         script: 'cd src/Tasks/dependency-check-build-task && npm run build'
-      displayName: 'Run Typescript compile'
+      displayName: 'Run npm install & tsc compile'
   
     - task: TfxInstaller@3
       displayName: 'Use Node CLI for Azure DevOps'
