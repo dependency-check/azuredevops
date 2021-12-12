@@ -15,4 +15,6 @@
 - Bumped dependency versions of package.json
 - Update to node10 handler (#91)
 - tsconfig.json target from es6 to es2020
+    - Made chagnes to dependency-check-build-task.ts to support this (removed undefined '?' for variablen)
 - Migrated file upload old vso console.out to tasklib upload method
+ 
