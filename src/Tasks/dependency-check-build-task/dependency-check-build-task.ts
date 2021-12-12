@@ -196,12 +196,11 @@ async function run() {
         // Process scan artifacts is required
         let processArtifacts = ((!failed || isViolation) && uploadReports);
         if (processArtifacts) {
-            let jobAttempt = tl.getVariable('System.JobAttempt')
-            let stageName = tl.getVariable('System.StageName') 
-            let jobId = tl.getVariable('System.JobId')
-
-            // Silly thing, when you don't specify the job name in a multistage pipeline the name of the job is __default
-            
+            let jobAttempt = tl.getVariable('System.JobAttempt');
+            let stageAttempt = tl.getVariable('System.StageAttempt');
+            let stageName = tl.getVariable('System.StageName');
+            let jobName = tl.getVariable('System.JobName');
+            let jobId = tl.getVariable('System.JobId');
 
             logDebug('Attachments:');
             let reports = tl.findMatch(reportsDirectory, '**/*.*');
@@ -211,14 +210,9 @@ async function run() {
                 let fileBaseName = fileName.substring(0, (fileName.length - fileExtension.length));
                 let fileDirName = path.dirname(filePath);
 
-                let fileNameBuildUp: string[] = []
-                if (stageName !== '__default') { fileNameBuildUp.push(`${stageName}`); }
-                if (jobAttempt !== '1') { fileNameBuildUp.push(`${jobAttempt}`); }
-
-                let fileAppendix = fileNameBuildUp.join('-')
-
-                if (fileAppendix.length > 1) {
-                    let newFilePath = path.join(fileDirName, `${fileBaseName}_${jobId}-${fileAppendix}${fileExtension}`);
+                // We want unique report names, so when there is a deviation of the standard, add the job Id to the report
+                if (stageName !== '__default' || jobName !== '__default' || jobAttempt !== '1' || stageAttempt !== '1') { 
+                    let newFilePath = path.join(fileDirName, `${fileBaseName}_${jobId}${fileExtension}`);
                     fs.renameSync(filePath, newFilePath);
                     filePath = newFilePath;
                 }
