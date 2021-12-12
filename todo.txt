@@ -1,6 +1,6 @@
 - fix task id --> {
     "id":  "47EA1F4A-57BA-414A-B12E-C44F42765E72",
-- enable prod build
+- enable prod build ; master --> main
 
 
 - Automated the build process:
@@ -9,7 +9,8 @@
  - Update azure-pipelines.yml and set variable 'shareWith'. This is the Azure DevOps organisation to run your tests installations from
  - To make this work, the extension version is bumped to version 6.1
  - No need anymore to update both extension version and task version manually for patch versions
-- Removed manual build steps
-- Remove unused dependencies & files
-- Bumped dependency versions
-- Update to node10 handler
+ - Removed manual build steps
+- Remove unused dependencies (package.json)
+- Removed unused typescript files
+- Bumped dependency versions of package.json
+- Update to node10 handler (#91)
