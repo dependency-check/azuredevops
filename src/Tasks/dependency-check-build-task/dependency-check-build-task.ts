@@ -210,7 +210,7 @@ async function run() {
                 let fileBaseName = fileName.substring(0, (fileName.length - fileExtension.length));
                 let fileDirName = path.dirname(filePath);
 
-                let fileNameBuildUp: string[]
+                let fileNameBuildUp: string[] = []
                 if (stageName !== '__default') { fileNameBuildUp.push(`${stageName}`); }
                 if (jobName !== '__default') { fileNameBuildUp.push(`${jobAttempt}`); }
                 if (jobAttempt !== '1') { fileNameBuildUp.push(`${jobAttempt}`); }

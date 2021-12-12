@@ -97,7 +97,7 @@ stages:
 
 - stage: Production
   displayName: 'Publish to Marketplace (Public)'
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   dependsOn: 'Test'
   jobs:
     - deployment: 
@@ -118,7 +118,7 @@ stages:
                 connectTo: 'VsTeam'
                 connectedServiceName: 'Marketplace'
                 fileType: 'vsix'
-                vsixFile: '$(Pipeline.Workspace)/vsix/$(extensionFileName).vsix'
+                vsixFile: '$(Pipeline.Workspace)/vsix/$(extensionFileName)'
                 publisherId: $(publisher)
                 extensionId: $(extensionId)
                 extensionName: $(extensionName)
