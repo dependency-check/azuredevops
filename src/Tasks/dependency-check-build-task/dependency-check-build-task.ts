@@ -24,6 +24,9 @@ async function run() {
         let enableExperimental: boolean = tl.getBoolInput('enableExperimental', true);
         let enableRetired: boolean = tl.getBoolInput('enableRetired', true);
         let enableVerbose: boolean = tl.getBoolInput('enableVerbose', true);
+        let uploadReports: boolean = tl.getBoolInput('uploadreports', true);
+        let uploadSARIFReport: boolean = tl.getBoolInput('uploadSARIFReport', false);
+
         let localInstallPath: string | undefined = tl.getPathInput('localInstallPath');
         let dependencyCheckVersion: string | undefined = tl.getInput('dependencyCheckVersion') || 'latest';
         let dataMirror: string | undefined = tl.getInput('dataMirror');
@@ -191,22 +194,29 @@ async function run() {
         let isViolation = exitCode == 1;
 
         // Process scan artifacts is required
-        let processArtifacts = !failed || isViolation;
+        let processArtifacts = ((!failed || isViolation) && uploadReports);
         if (processArtifacts) {
+            let jobAttempt = tl.getVariable('System.JobAttempt')
             logDebug('Attachments:');
             let reports = tl.findMatch(reportsDirectory, '**/*.*');
             reports.forEach(filePath => {
-                let fileName = path.basename(filePath).replace('.', '%2E');
-                let fileExt = path.extname(filePath);
-                logDebug(`Attachment name: ${fileName}`);
+                let fileName = path.basename(filePath);
+                let fileExtension = path.extname(filePath);
+                let fileBaseName = fileName.substring(0,(fileName.length - fileExtension.length))
+                let fileDirName = path.dirname(filePath);
+
+                if (jobAttempt !== '1') {
+                    let newFilePath= path.join(fileDirName, `${fileBaseName}_${jobAttempt}${fileExtension}`)
+                    fs.renameSync(filePath, newFilePath)
+                    filePath = newFilePath
+                } 
                 logDebug(`Attachment path: ${filePath}`);
-                logDebug(`Attachment type: ${fileExt}`);
 
                 tl.uploadArtifact('dependency-check', filePath, 'Dependency Check')
 
                 // To display the SARIF report in Azure DevOps with the SARIF SAST Scans Tab extension, the report must me in the CodeAnalysisLogs artifact 
-                if (fileExt.toLowerCase() === '.sarif') {
-                    logDebug(`Uploaded SARIF attachment: ${fileName}`);
+                if (uploadSARIFReport && fileExtension.toLowerCase() === '.sarif') {
+                    logDebug(`Uploaded SARIF attachment: ${filePath}`);
                     tl.uploadArtifact('OWASPDependencyCheck', `${filePath}`, 'CodeAnalysisLogs')
                 }
             })

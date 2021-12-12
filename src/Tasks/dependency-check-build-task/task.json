@@ -60,6 +60,22 @@
       }
     },
     {
+      "name": "uploadreports",
+      "type": "boolean",
+      "label": "Upload reports as artifacts",
+      "defaultValue": true,
+      "required": true,
+      "helpMarkDown": "Enable the upload of reports. Reports wil be uploaded in the artifact named 'Dependency Check' of the pipeline run ."
+    },
+    {
+      "name": "uploadSARIFReport",
+      "type": "boolean",
+      "label": "Upload SARIF reports to 'CodeAnalysisLogs'",
+      "defaultValue": false,
+      "required": false,
+      "helpMarkDown": "When true and when SARIF is selected as format, the SARIF report will also be uploaded to the 'CodeAnalysisLogs' artifact."
+    },
+    {
       "name": "failOnCVSS",
       "type": "string",
       "label": "CVSS Failure Threshold",
