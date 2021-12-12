@@ -8,3 +8,6 @@
  - Authorize Azure DevOps project to use this git repository
  - Update azure-pipelines.yml and set variable 'shareWith'. This is the Azure DevOps organisation to run your tests installations from
 - Removed manual build steps
+- Remove unused dependencies & files
+- Bumped dependency versions
+- Update to node10 handler
