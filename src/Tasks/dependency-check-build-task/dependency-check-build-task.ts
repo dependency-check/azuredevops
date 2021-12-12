@@ -207,7 +207,7 @@ async function run() {
                 // To display the SARIF report in Azure DevOps with the SARIF SAST Scans Tab extension, the report must me in the CodeAnalysisLogs artifact 
                 if (fileExt.toLowerCase() === '.sarif') {
                     logDebug(`Uploaded SARIF attachment: ${fileName}`);
-                    tl.uploadArtifact('dependency-check', `${filePath}/${fileExt}, 'CodeAnalysisLogs')
+                    tl.uploadArtifact('dependency-check', `${filePath}/${fileExt}`, 'CodeAnalysisLogs')
                 }
             })
 
