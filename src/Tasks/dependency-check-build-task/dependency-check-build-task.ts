@@ -8,13 +8,6 @@ import DecompressZip = require('decompress-zip');
 const client = new httpClient.HttpClient('DC_AGENT');
 const releaseApi = 'https://api.github.com/repos/jeremylong/DependencyCheck/releases';
 
-// Install prerequisites : https://docs.microsoft.com/en-us/azure/devops/extend/develop/add-build-task?view=azure-devops#prerequisites
-// To test locally Run:
-// cd ./Tasks/dependency-check-build-task/
-// npm install
-// npm run build
-// node dependency-check-build-task.js
-
 async function run() {
     console.log("Starting Dependency Check...")
     try {
@@ -157,18 +150,18 @@ async function run() {
         // Version smoke test
         await tl.tool(depCheckPath).arg('--version').exec();
 
-        if(!hasLocalInstallation) {
+        if (!hasLocalInstallation) {
             // Remove lock files from potential previous canceled run if no local/centralized installation of tool is used.
             // We need this because due to a bug the dependency check tool is currently leaving .lock files around if you cancel at the wrong moment.
             // Since a per-agent installation shouldn't be able to run two scans parallel, we can savely remove all lock files still lying around.
             console.log('Searching for left over lock files...');
             let lockFiles = tl.findMatch(localInstallPath, '*.lock', null, { matchBase: true });
-            if(lockFiles.length > 0) {
+            if (lockFiles.length > 0) {
                 console.log('found ' + lockFiles.length + ' left over lock files, removing them now...');
                 lockFiles.forEach(lockfile => {
                     let fullLockFilePath = tl.resolve(lockfile);
                     try {
-                        if(tl.exist(fullLockFilePath)) {
+                        if (tl.exist(fullLockFilePath)) {
                             console.log('removing lock file "' + fullLockFilePath + '"...');
                             tl.rmRF(fullLockFilePath);
                         }
@@ -209,12 +202,11 @@ async function run() {
                 logDebug(`Attachment path: ${filePath}`);
                 logDebug(`Attachment type: ${fileExt}`);
 
-                console.log(`##vso[task.addattachment type=dependencycheck-artifact;name=${fileName};]${filePath}`);
-                console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=Dependency Check;]${filePath}`);                
+                tl.uploadArtifact('dependency-check', filePath, 'Dependency Check')
 
                 // To display the SARIF report in Azure DevOps with the SARIF SAST Scans Tab extension, the report must me in the CodeAnalysisLogs artifact 
-                if (fileExt.toUpperCase() ==='SARIF') {
-                    console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=CodeAnalysisLogs;]${filePath}`);   
+                if (fileExt.toUpperCase() === 'SARIF') {
+                    tl.uploadArtifact('dependency-check', filePath, 'CodeAnalysisLogs')
                 }
             })
 
@@ -226,10 +218,10 @@ async function run() {
         let message = "Dependency Check succeeded"
         let result = tl.TaskResult.Succeeded
         if (failed) {
-            if(isViolation) {
+            if (isViolation) {
                 message = "CVSS threshold violation.";
 
-                if(warnOnCVSSViolation) {
+                if (warnOnCVSSViolation) {
                     result = tl.TaskResult.SucceededWithIssues
                 }
                 else {
@@ -243,7 +235,7 @@ async function run() {
         }
 
         let consoleMessage = 'Dependency Check ';
-        switch(result) {
+        switch (result) {
             case tl.TaskResult.Succeeded:
                 consoleMessage += 'succeeded'
                 break;
@@ -269,14 +261,14 @@ async function run() {
 }
 
 function logDebug(message: string) {
-    if(message !== null) {
+    if (message !== null) {
         let varSystemDebug = tl.getVariable('system.debug');
 
-        if(typeof varSystemDebug === 'string') {
-            if(varSystemDebug.toLowerCase() == 'true') {
+        if (typeof varSystemDebug === 'string') {
+            if (varSystemDebug.toLowerCase() == 'true') {
                 console.log('##[debug]' + message)
             }
-        }    
+        }
     }
 }
 
@@ -302,7 +294,7 @@ async function unzipFromUrl(zipUrl: string, unzipLocation: string): Promise<void
     let tmpError = null;
     let response = null;
     let downloadErrorRetries = 5;
-    
+
     do {
         tmpError = null;
         try {
@@ -310,16 +302,16 @@ async function unzipFromUrl(zipUrl: string, unzipLocation: string): Promise<void
             response = await client.get(zipUrl);
             await logDebug('done downloading');
         }
-        catch(error) {
+        catch (error) {
             tmpError = error;
             downloadErrorRetries--;
-            await console.error('Error trying to download ZIP (' + (downloadErrorRetries+1) + ' tries left)');
+            await console.error('Error trying to download ZIP (' + (downloadErrorRetries + 1) + ' tries left)');
             await console.error(error);
         }
     }
-    while(tmpError !== null && downloadErrorRetries >= 0);
-    
-    if(tmpError !== null) {
+    while (tmpError !== null && downloadErrorRetries >= 0);
+
+    if (tmpError !== null) {
         throw tmpError;
     }
 
