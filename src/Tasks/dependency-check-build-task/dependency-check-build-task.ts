@@ -197,20 +197,33 @@ async function run() {
         let processArtifacts = ((!failed || isViolation) && uploadReports);
         if (processArtifacts) {
             let jobAttempt = tl.getVariable('System.JobAttempt')
+            let stageName = tl.getVariable('System.StageName')
+            let jobName = tl.getVariable('System.JobName')
+
+
+
             logDebug('Attachments:');
             let reports = tl.findMatch(reportsDirectory, '**/*.*');
             reports.forEach(filePath => {
                 let fileName = path.basename(filePath);
                 let fileExtension = path.extname(filePath);
-                let fileBaseName = fileName.substring(0,(fileName.length - fileExtension.length))
+                let fileBaseName = fileName.substring(0, (fileName.length - fileExtension.length));
                 let fileDirName = path.dirname(filePath);
 
-                if (jobAttempt !== '1') {
-                    let newFilePath= path.join(fileDirName, `${fileBaseName}_${jobAttempt}${fileExtension}`)
-                    fs.renameSync(filePath, newFilePath)
-                    filePath = newFilePath
-                } 
-                logDebug(`Attachment path: ${filePath}`);
+                let fileNameBuildUp: string[]
+                if (stageName !== '__default') { fileNameBuildUp.push(`${stageName}`); }
+                if (jobName !== '__default') { fileNameBuildUp.push(`${jobAttempt}`); }
+                if (jobAttempt !== '1') { fileNameBuildUp.push(`${jobAttempt}`); }
+
+                let fileAppendix = fileNameBuildUp.join('-')
+
+                if (fileAppendix.length > 1) {
+                    let newFilePath = path.join(fileDirName, `${fileBaseName}_${fileAppendix}${fileExtension}`);
+                    fs.renameSync(filePath, newFilePath);
+                    filePath = newFilePath;
+                }
+
+                logDebug(`Uploading file: ${filePath}`);
 
                 tl.uploadArtifact('dependency-check', filePath, 'Dependency Check')
 
