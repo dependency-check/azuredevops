@@ -9,11 +9,11 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  publisher: 'dependency-check'
+  publisher: 'foxholenl'  #'dependency-check'
   extensionId: 'dependencycheck'
   extensionName: 'OWASP Dependency Check'
   extensionFileName: 'dependency-check.vsix'
-  shareWith: '<testorganisation>'
+  shareWith: 'foxholenl'
 
 stages:
 - stage: 'Build'

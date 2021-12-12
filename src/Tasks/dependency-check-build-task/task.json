@@ -1,5 +1,5 @@
 {
-  "id":  "47EA1F4A-57BA-414A-B12E-C44F42765E72",
+  "id":  "47EA1F4A-57BA-414A-B12E-C44F42765E73",
   "name":  "dependency-check-build-task",
   "friendlyName":  "OWASP Dependency Check",
   "description": "Dependency Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project's dependencies.",
