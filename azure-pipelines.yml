@@ -51,7 +51,7 @@ stages:
         rootFolder: '$(Build.SourcesDirectory)'
         outputPath: '$(Build.ArtifactStagingDirectory)/dependency-check.vsix'
         publisherId: $(publisher)
-        extensionId: $(extensionName)
+        extensionId: $(extensionId)
         extensionName: $(extensionName)
         extensionTag: '-build'
         extensionVersion: '$(Build.BuildNumber)'
@@ -124,7 +124,7 @@ stages:
                 fileType: 'vsix'
                 vsixFile: '$(Pipeline.Workspace)/vsix/$(extensionFileName).vsix'
                 publisherId: $(publisher)
-                extensionId: $(extensionName)
+                extensionId: $(extensionId)
                 extensionName: $(extensionName)
                 updateTasksVersion: true
                 extensionVisibility: 'public'
