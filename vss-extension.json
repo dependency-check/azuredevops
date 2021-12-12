@@ -95,7 +95,7 @@
       ],
       "type": "ms.vss-distributed-task.task",
       "properties": {
-        "name": "Tasks"
+        "name": "Tasks/dependency-check-build-task"
       }
     }
   ]

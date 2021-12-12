@@ -7,6 +7,8 @@
  - Create a public Azure DevOps project
  - Authorize Azure DevOps project to use this git repository
  - Update azure-pipelines.yml and set variable 'shareWith'. This is the Azure DevOps organisation to run your tests installations from
+ - To make this work, the extension version is bumped to version 6.1
+ - No need anymore to update both extension version and task version manually for patch versions
 - Removed manual build steps
 - Remove unused dependencies & files
 - Bumped dependency versions
