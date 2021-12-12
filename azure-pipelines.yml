@@ -101,7 +101,7 @@ stages:
 
 - stage: Production
   displayName: 'Publish to Marketplace (Public)'
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   dependsOn: 'Test'
   jobs:
     - deployment: 
