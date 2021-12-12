@@ -14,3 +14,4 @@
 - Removed unused typescript files
 - Bumped dependency versions of package.json
 - Update to node10 handler (#91)
+- tsconfig.json target from es6 to es2020
