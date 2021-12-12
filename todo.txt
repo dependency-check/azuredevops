@@ -15,3 +15,4 @@
 - Bumped dependency versions of package.json
 - Update to node10 handler (#91)
 - tsconfig.json target from es6 to es2020
+- Migrated file upload old vso console.out to tasklib upload method

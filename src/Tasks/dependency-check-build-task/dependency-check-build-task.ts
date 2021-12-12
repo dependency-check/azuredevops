@@ -12,18 +12,18 @@ async function run() {
     console.log("Starting Dependency Check...")
     try {
         // Get inputs from build task.
-        let projectName: string | undefined = tl.getInput('projectName', true);
-        let scanPath: string | undefined = tl.getPathInput('scanPath', true);
+        let projectName: string = tl.getInput('projectName', true).trim();
+        let scanPath: string = tl.getPathInput('scanPath', true).trim();
         let excludePath: string | undefined = tl.getPathInput('excludePath');
-        let format: string | undefined = tl.getInput('format', true);
+        let format: string = tl.getInput('format', true);
         let failOnCVSS: string | undefined = tl.getInput('failOnCVSS');
         let suppressionPath: string | undefined = tl.getPathInput('suppressionPath');
         let reportsDirectory: string | undefined = tl.getPathInput('reportsDirectory');
-        let warnOnCVSSViolation: boolean | undefined = tl.getBoolInput('warnOnCVSSViolation', true);
+        let warnOnCVSSViolation: boolean = tl.getBoolInput('warnOnCVSSViolation', true);
         let reportFilename: string | undefined = tl.getPathInput('reportFilename');
-        let enableExperimental: boolean | undefined = tl.getBoolInput('enableExperimental', true);
-        let enableRetired: boolean | undefined = tl.getBoolInput('enableRetired', true);
-        let enableVerbose: boolean | undefined = tl.getBoolInput('enableVerbose', true);
+        let enableExperimental: boolean = tl.getBoolInput('enableExperimental', true);
+        let enableRetired: boolean = tl.getBoolInput('enableRetired', true);
+        let enableVerbose: boolean = tl.getBoolInput('enableVerbose', true);
         let localInstallPath: string | undefined = tl.getPathInput('localInstallPath');
         let dependencyCheckVersion: string | undefined = tl.getInput('dependencyCheckVersion') || 'latest';
         let dataMirror: string | undefined = tl.getInput('dataMirror');
@@ -32,14 +32,12 @@ async function run() {
         let hasLocalInstallation = true;
 
         // Trim the strings
-        projectName = projectName?.trim()
-        scanPath = scanPath?.trim();
-        excludePath = excludePath?.trim();
-        suppressionPath = suppressionPath?.trim();
-        reportsDirectory = reportsDirectory?.trim();
-        reportFilename = reportFilename?.trim();
-        additionalArguments = additionalArguments?.trim();
-        localInstallPath = localInstallPath?.trim();
+        if (excludePath !== undefined) excludePath = excludePath.trim();
+        if (suppressionPath !== undefined) suppressionPath = suppressionPath.trim();
+        if (reportsDirectory !== undefined) reportsDirectory = reportsDirectory.trim();
+        if (reportFilename !== undefined) reportFilename = reportFilename.trim();
+        if (additionalArguments !== undefined) additionalArguments = additionalArguments.trim();
+        if (localInstallPath !== undefined) localInstallPath = localInstallPath.trim();
 
         let sourcesDirectory = tl.getVariable('Build.SourcesDirectory');
         let testDirectory = tl.getVariable('Common.TestResultsDirectory');
@@ -60,7 +58,7 @@ async function run() {
 
         // Set output folder (and filename if supplied)
         let outField: string = reportsDirectory;
-        if (reportFilename && format?.split(',')?.length === 1 && format != "ALL") {
+        if (reportFilename && format !== undefined && format.split(',').length === 1 && format != "ALL") {
             outField = tl.resolve(reportsDirectory, reportFilename);
         }
 
@@ -72,10 +70,12 @@ async function run() {
             args += ` --exclude "${excludePath}"`;
 
         // Format types
-        let outputTypes = format?.split(',');
-        outputTypes?.forEach(outputType => {
-            args += ` --format ${outputType}`;
-        });
+        if (format !== undefined) {
+            let outputTypes = format.split(',');
+            outputTypes.forEach(outputType => {
+                args += ` --format ${outputType}`;
+            });
+        }
 
         // Fail on CVSS switch
         if (failOnCVSS)
