@@ -86,7 +86,7 @@ stages:
               checkLatest: true
 
           - task: PublishAzureDevOpsExtension@3
-            name: 'PublishTest'
+            name: 'Publish'
             inputs:
               connectTo: 'VsTeam'
               connectedServiceName: 'Marketplace'
@@ -120,7 +120,7 @@ stages:
                 checkLatest: true
 
             - task: PublishAzureDevOpsExtension@3
-              name: 'PublishProd'
+              name: 'Publish'
               inputs:
                 connectTo: 'VsTeam'
                 connectedServiceName: 'Marketplace'
