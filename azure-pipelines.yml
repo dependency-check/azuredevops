@@ -27,12 +27,6 @@ stages:
       inputs:
         versionSpec: '16.x'
       displayName: 'Install Node.js'
-    
-    - task: Bash@3
-      inputs:
-        targetType: 'inline'
-        script: 'cd src/Tasks/dependency-check-build-task && npm install --production'
-      displayName: 'Run NPM Install'
 
     - task: Bash@3
       inputs:

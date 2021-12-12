@@ -4,7 +4,7 @@
   "description": "",
   "main": "dependency-check-build-task.js",
   "scripts": {
-    "build": "tsc -p ."
+    "build": "npm install --only-prod && tsc -p ."
   },
   "author": "Dependency Check",
   "license": "Apache-2.0",
