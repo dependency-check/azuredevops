@@ -198,8 +198,8 @@ async function run() {
         if (processArtifacts) {
             let jobAttempt = tl.getVariable('System.JobAttempt');
             let stageAttempt = tl.getVariable('System.StageAttempt');
-            let stageName = tl.getVariable('System.StageName');
-            let jobName = tl.getVariable('System.JobName');
+            let stageName = tl.getVariable('System.StageDisplayName').replace(' ','');
+            let jobName = tl.getVariable('System.JobDisplayName').replace(' ','');
             let jobId = tl.getVariable('System.JobId');
 
             logDebug('Attachments:');
