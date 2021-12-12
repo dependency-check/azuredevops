@@ -197,10 +197,11 @@ async function run() {
         let processArtifacts = ((!failed || isViolation) && uploadReports);
         if (processArtifacts) {
             let jobAttempt = tl.getVariable('System.JobAttempt')
-            let stageName = tl.getVariable('System.StageName')
-            let jobName = tl.getVariable('System.JobName')
+            let stageName = tl.getVariable('System.StageName') 
+            let jobId = tl.getVariable('System.JobId')
 
-
+            // Silly thing, when you don't specify the job name in a multistage pipeline the name of the job is __default
+            
 
             logDebug('Attachments:');
             let reports = tl.findMatch(reportsDirectory, '**/*.*');
@@ -212,13 +213,12 @@ async function run() {
 
                 let fileNameBuildUp: string[] = []
                 if (stageName !== '__default') { fileNameBuildUp.push(`${stageName}`); }
-                if (jobName !== '__default') { fileNameBuildUp.push(`${jobAttempt}`); }
                 if (jobAttempt !== '1') { fileNameBuildUp.push(`${jobAttempt}`); }
 
                 let fileAppendix = fileNameBuildUp.join('-')
 
                 if (fileAppendix.length > 1) {
-                    let newFilePath = path.join(fileDirName, `${fileBaseName}_${fileAppendix}${fileExtension}`);
+                    let newFilePath = path.join(fileDirName, `${fileBaseName}_${jobId}-${fileAppendix}${fileExtension}`);
                     fs.renameSync(filePath, newFilePath);
                     filePath = newFilePath;
                 }
