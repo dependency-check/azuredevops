@@ -9,11 +9,11 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  publisher: 'foxholenl'  #'dependency-check'
+  publisher: 'dependency-check'
   extensionId: 'dependencycheck'
   extensionName: 'OWASP Dependency Check'
   extensionFileName: 'dependency-check.vsix'
-  shareWith: 'foxholenl'
+  shareWith: '<sharewith>'
 
 stages:
 - stage: 'Build'
@@ -97,7 +97,7 @@ stages:
 
 - stage: Production
   displayName: 'Publish to Marketplace (Public)'
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   dependsOn: 'Test'
   jobs:
     - deployment: 
