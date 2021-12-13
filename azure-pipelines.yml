@@ -87,7 +87,7 @@ stages:
               fileType: 'vsix'
               vsixFile: '$(Pipeline.Workspace)/vsix/$(extensionFileName)'
               publisherId: $(publisher)
-              extensionId: $(extensionId)
+              extensionId: $(extensionId)-dev
               extensionName: $(extensionName) - DEV
               extensionTag: '-dev'
               updateTasksVersion: true

@@ -205,13 +205,15 @@ async function run() {
             logDebug('Attachments:');
             let reports = tl.findMatch(reportsDirectory, '**/*.*');
             reports.forEach(filePath => {
-                let fileName = path.basename(filePath);
                 let fileExtension = path.extname(filePath);
-                let fileBaseName = fileName.substring(0, (fileName.length - fileExtension.length));
-                let fileDirName = path.dirname(filePath);
-
+                
                 // We want unique report names, so when there is a deviation of the standard, add the job Id to the report
                 if (stageName !== '__default' || jobName !== '__default' || jobAttempt !== '1' || stageAttempt !== '1') { 
+                    let fileName = path.basename(filePath);
+                    
+                    let fileBaseName = fileName.substring(0, (fileName.length - fileExtension.length));
+                    let fileDirName = path.dirname(filePath);
+
                     let newFilePath = path.join(fileDirName, `${fileBaseName}_${jobId}${fileExtension}`);
                     fs.renameSync(filePath, newFilePath);
                     filePath = newFilePath;
