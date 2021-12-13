@@ -1,16 +1,15 @@
 {
-  "id": "[task id]",
-  "name": "[task name]",
-  "friendlyName": "OWASP Dependency Check",
+  "id":  "47EA1F4A-57BA-414A-B12E-C44F42765E72",
+  "name":  "dependency-check-build-task",
+  "friendlyName":  "OWASP Dependency Check",
   "description": "Dependency Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project's dependencies.",
-  "helpMarkDown": "[More Information](https://jeremylong.github.io/DependencyCheck/index.html)",
+  "helpMarkDown": "[More Information](https://github.com/dependency-check/azuredevops)",
   "category": "Build",
-  "visibility": [ "Build" ],
   "author": "Dependency Check",
   "version": {
-    "Major": "[major]",
-    "Minor": "[minor]",
-    "Patch": "[patchrev]"
+    "Major": "6",
+    "Minor": "1",
+    "Patch": "0"
   },
   "demands": [],
   "minimumAgentVersion": "2.0.0",
@@ -45,7 +44,7 @@
       "label": "Report Format",
       "defaultValue": "HTML",
       "required": true,
-      "helpMarkDown": "The output format to write to (XML, HTML, CSV, JSON, JUNIT, ALL). Multiple formats can be selected. The default is HTML.",
+      "helpMarkDown": "The output format to write to (XML, HTML, CSV, JSON, JUNIT, SARIF, ALL). Multiple formats can be selected. The default is HTML.",
       "properties": {
         "EditableOptions": "False",
         "MultiSelectFlatList": "True"
@@ -56,8 +55,25 @@
         "CSV": "CSV",
         "JSON": "JSON",
         "JUNIT": "JUNIT",
+        "SARIF": "SARIF",
         "ALL": "ALL"
       }
+    },
+    {
+      "name": "uploadreports",
+      "type": "boolean",
+      "label": "Upload reports as artifacts",
+      "defaultValue": true,
+      "required": true,
+      "helpMarkDown": "Enable the upload of reports. Reports wil be uploaded in the artifact named 'Dependency Check' of the pipeline run ."
+    },
+    {
+      "name": "uploadSARIFReport",
+      "type": "boolean",
+      "label": "Upload SARIF reports to 'CodeAnalysisLogs'",
+      "defaultValue": false,
+      "required": false,
+      "helpMarkDown": "When true and when SARIF is selected as format, the SARIF report will also be uploaded to the 'CodeAnalysisLogs' artifact."
     },
     {
       "name": "failOnCVSS",
@@ -166,9 +182,8 @@
   ],
   "instanceNameFormat": "Dependency Check",
   "execution": {
-    "Node": {
+    "Node10": {
       "target": "$(currentDirectory)/dependency-check-build-task.js",
-      "argumentFormat": "",
       "workingDirectory": "$(currentDirectory)"
     }
   }
