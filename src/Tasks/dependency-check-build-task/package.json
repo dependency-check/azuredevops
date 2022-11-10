@@ -9,7 +9,7 @@
   "author": "Dependency Check",
   "license": "Apache-2.0",
   "dependencies": {
-    "azure-pipelines-task-lib": "^3.0.6-preview.1",
+    "azure-pipelines-task-lib": "^3.3.1",
     "decompress-zip": "^0.3.3",
     "is-core-module": "^2.4.0",
     "resolve": "^1.20.0",
