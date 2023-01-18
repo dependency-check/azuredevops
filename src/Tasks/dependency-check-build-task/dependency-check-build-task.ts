@@ -72,7 +72,13 @@ async function run() {
         }
 
         // Default args
-        let args = `--project "${projectName}" --scan "${scanPath}" --out "${outField}"`;
+        let args = `--project "${projectName}" --out "${outField}"`;
+
+        // Scan paths
+        let paths = scanPath?.split(',');
+        paths?.forEach(path => {
+            args += ` --scan "${path}"`;
+        });
 
         // Exclude switch
         if (excludePath != sourcesDirectory)
