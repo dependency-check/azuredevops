@@ -201,7 +201,7 @@ async function run() {
 
         // Process based on exit code
         let failed = exitCode != 0;
-        let isViolation = exitCode == 1;
+        let isViolation = exitCode == (dependencyCheckVersion.match(/^[0-7]\./) ? 1 : 15);
 
         // Process scan artifacts is required
         let processArtifacts = !failed || isViolation;
