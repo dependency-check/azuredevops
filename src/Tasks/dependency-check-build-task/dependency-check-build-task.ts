@@ -72,7 +72,13 @@ async function run() {
         }
 
         // Default args
-        let args = `--project "${projectName}" --scan "${scanPath}" --out "${outField}"`;
+        let args = `--project "${projectName}" --out "${outField}"`;
+
+        // Scan paths
+        let paths = scanPath?.split(',');
+        paths?.forEach(path => {
+            args += ` --scan "${path}"`;
+        });
 
         // Exclude switch
         if (excludePath != sourcesDirectory)
@@ -195,7 +201,7 @@ async function run() {
 
         // Process based on exit code
         let failed = exitCode != 0;
-        let isViolation = exitCode == 1;
+        let isViolation = exitCode == (dependencyCheckVersion.match(/^[0-7]\./) ? 1 : 15);
 
         // Process scan artifacts is required
         let processArtifacts = !failed || isViolation;
