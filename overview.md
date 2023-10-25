@@ -6,7 +6,7 @@ The OWASP Dependency Check Azure DevOps Extension enables the following features
 
 - Software composition analysis runs against package references during build on both Windows and Linux build agents.
 
-- Export vulnerability data to HTML, JSON, XML, CSV, JUnit formatted reports
+- Export vulnerability data to HTML, JSON, XML, CSV, JUnit, SARIF formatted reports
 
 - Download vulnerability reports from the build's artifacts
 
