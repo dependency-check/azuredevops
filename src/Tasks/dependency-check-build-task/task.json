@@ -24,6 +24,14 @@
       "required": true
     },
     {
+      "name": "artifactName",
+      "type": "string",
+      "label": "Artifact Name",
+      "helpMarkDown": "The name of the artifact where the results will be uploaded.",
+      "defaultValue": "Dependency Check",
+      "required": false
+    },
+    {
       "name": "scanPath",
       "type": "filePath",
       "label": "Scan Path",
