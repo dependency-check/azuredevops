@@ -20,7 +20,7 @@ async function run() {
     try {
         // Get inputs from build task.
         let projectName: string | undefined = tl.getInput('projectName', true);
-        let artifactName: string | undefined = tl.getInput('projectName') || 'Dependency Check';
+        let artifactName: string | undefined = tl.getInput('artifactName') || 'Dependency Check';
         let scanPath: string | undefined = tl.getPathInput('scanPath', true);
         let excludePath: string | undefined = tl.getPathInput('excludePath');
         let format: string | undefined = tl.getInput('format', true);
