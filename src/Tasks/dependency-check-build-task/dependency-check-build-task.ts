@@ -158,7 +158,12 @@ async function run() {
         console.log(`Arguments: ${args}`);
 
         // Set Java args
-        tl.setVariable('JAVA_OPTS', '-Xss8192k');
+        const customJavaOpts = tl.getVariable('JAVA_OPTS');
+        if(customJavaOpts) {
+            console.log(`Dependency Check will run with custom JAVA_OPTS: ${customJavaOpts}.`)
+        } else {
+            tl.setVariable('JAVA_OPTS', '-Xss8192k');
+        }
 
         // Version smoke test
         await tl.tool(depCheckPath).arg('--version').exec();
