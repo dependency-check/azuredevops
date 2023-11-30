@@ -38,7 +38,8 @@ async function run() {
         let additionalArguments: string | undefined = tl.getInput('additionalArguments');
         let hasLocalInstallation = true;
         let nvdApiKey: string | undefined = tl.getInput('nvdApiKey');
-
+        nvdApiKey = nvdApiKey?.trim();
+        
         // Trim the strings
         projectName = projectName?.trim()
         scanPath = scanPath?.trim();
