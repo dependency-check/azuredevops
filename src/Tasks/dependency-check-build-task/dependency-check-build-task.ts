@@ -37,6 +37,7 @@ async function run() {
         let customRepo: string | undefined = tl.getInput('customRepo');
         let additionalArguments: string | undefined = tl.getInput('additionalArguments');
         let hasLocalInstallation = true;
+        let nvdApiKey: string | undefined = tl.getInput('nvdApiKey');
 
         // Trim the strings
         projectName = projectName?.trim()
@@ -109,6 +110,10 @@ async function run() {
         // Set log switch if requested
         if (enableVerbose)
             args += ` --log "${logFile}"`;
+
+        // Sets the NVD API Key 
+        if (nvdApiKey)
+            args += ` --nvdApiKey "{nvdApiKey}"`;
 
         // Set additionalArguments
         if (additionalArguments)

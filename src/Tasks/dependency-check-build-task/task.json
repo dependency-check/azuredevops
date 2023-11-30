@@ -132,6 +132,14 @@
       "helpMarkDown": "Pass additional command line arguments to the Dependency Check command line interface."
     },
     {
+      "name": "nvdApiKey",
+      "type": "string",
+      "label": "NVD Api Key",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "The NVD API Key obtained from https://nvd.nist.gov/developers/api-key-requested."
+    },
+    {
       "name": "localInstallPath",
       "type": "filePath",
       "label": "Local Install Path",
