@@ -1,2 +1,2 @@
-# Default administrators group
-*           @dependency-check/administrators
+# Default approvals group
+*           @dependency-check/administrators @alxmancini @pippolino @Saturate @tlogik
