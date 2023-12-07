@@ -20,6 +20,7 @@ async function run() {
     try {
         // Get inputs from build task.
         let projectName: string | undefined = tl.getInput('projectName', true);
+        let artifactName: string | undefined = tl.getInput('artifactName') || 'Dependency Check';
         let scanPath: string | undefined = tl.getPathInput('scanPath', true);
         let excludePath: string | undefined = tl.getPathInput('excludePath');
         let format: string | undefined = tl.getInput('format', true);
@@ -40,6 +41,7 @@ async function run() {
 
         // Trim the strings
         projectName = projectName?.trim()
+        artifactName = artifactName?.trim()
         scanPath = scanPath?.trim();
         excludePath = excludePath?.trim();
         suppressionPath = suppressionPath?.trim();
@@ -211,7 +213,7 @@ async function run() {
         // Process scan artifacts is required
         let processArtifacts = !failed || isViolation;
         if (processArtifacts) {
-            logDebug('Attachments:');
+            logDebug(`Attachments to artifact ${artifactName}:`);
             let reports = tl.findMatch(reportsDirectory, '**/*.*');
             reports.forEach(filePath => {
                 let fileName = path.basename(filePath).replace('.', '%2E');
@@ -220,7 +222,7 @@ async function run() {
                 logDebug(`Attachment path: ${filePath}`);
                 logDebug(`Attachment type: ${fileExt}`); 
                 console.log(`##vso[task.addattachment type=dependencycheck-artifact;name=${fileName};]${filePath}`);
-                console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=Dependency Check;]${filePath}`);
+                console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=${artifactName};]${filePath}`);
             })
 
             // Upload logs
