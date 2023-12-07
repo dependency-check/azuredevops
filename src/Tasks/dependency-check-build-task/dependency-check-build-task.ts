@@ -161,7 +161,12 @@ async function run() {
         // Console output for the log file
         console.log('Invoking Dependency Check...');
         console.log(`Path: ${depCheckPath}`);
-        console.log(`Arguments: ${args}`);
+
+        // We need to obfuscate the API key in the console output if present
+        // This has to be done as on Linux the API key, even is passed as an Azure DevOps secret, is visible in the console output
+        let uuidPattern = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g;
+        let argsConsole = args.replace(uuidPattern, '********-****-****-****-************');
+        console.log(`Arguments: ${argsConsole}`);
 
         // Set Java args
         tl.setVariable('JAVA_OPTS', '-Xss8192k');
