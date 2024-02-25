@@ -1,0 +1,125 @@
+parameters:
+  - name: PublishEnvironment
+    type: string
+jobs:
+  - deployment: 'publishJob'
+    displayName: 'Publish ${{ parameters.PublishEnvironment }}'
+    environment: '${{ parameters.PublishEnvironment }}'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+              displayName: 'Checkout project repository'
+              clean: False
+              fetchDepth: 0
+              fetchTags: True
+
+            - task: PowerShell@2
+              displayName: 'Set Publish Variables'
+              inputs:
+                filePath: '$(Build.SourcesDirectory)/build/pipeline/set-publish-variables.ps1'
+                workingDirectory: '$(Build.SourcesDirectory)'
+              env:
+                BUILD_SOURCE_BRANCH: $(Build.SourceBranch)
+                BUILD_SOURCE_BRANCH_NAME: $(Build.SourceBranchName)
+
+            - task: NodeTool@0
+              inputs:
+                versionSpec: '18.x'
+              displayName: 'Install Node.js'
+
+            - task: TfxInstaller@3
+              displayName: 'Use Node CLI for Azure DevOps'
+              inputs:
+                version: '0.x'
+                checkLatest: true
+
+            - ${{ if ne(parameters.PublishEnvironment, 'Release' ) }}:
+              - task: ExtractFiles@1
+                displayName: 'Unpackage Extension'
+                inputs:
+                  archiveFilePatterns: '$(Pipeline.Workspace)/vsix/$(extensionFileName)'
+                  destinationFolder: '$(Agent.TempDirectory)/vsix-temp/'
+                  cleanDestinationFolder: true
+
+              - task: PowerShell@2
+                displayName: 'Update Manifest'
+                inputs:
+                  filePath: '$(Build.SourcesDirectory)/build/pipeline/update-manifest.ps1'
+                env:
+                  BUILD_SOURCE_BRANCH: $(Build.SourceBranch)
+                  BUILD_SOURCE_BRANCH_NAME: $(Build.SourceBranchName)
+                  VSIX_TEMP_FOLDER: '$(Agent.TempDirectory)/vsix-temp/'
+                  SOURCE_FOLDER: '$(Build.SourcesDirectory)'
+
+              - task: ArchiveFiles@2
+                displayName: 'Package Extension'
+                inputs:
+                  rootFolderOrFile: '$(Agent.TempDirectory)/vsix-temp/'
+                  includeRootFolder: false
+                  archiveType: 'zip'
+                  archiveFile: '$(Pipeline.Workspace)/vsix/$(extensionFileName)'
+                  replaceExistingArchive: true
+
+              - task: UnpublishAzureDevOpsExtension@4
+                displayName: 'Unpublish old extension'
+                condition: and(succeeded(), ne('${{ parameters.PublishEnvironment }}', 'Release' ))
+                inputs:
+                  connectTo: 'VsTeam'
+                  connectedServiceName: '$(marketplaceConnectionName)'
+                  method: 'id'
+                  publisherId: '$(publisher)'
+                  extensionId: '$(extensionId)'
+                  extensionTag: '$(Publish.extensionTag)'
+
+            - task: PublishAzureDevOpsExtension@4
+              name: 'publishStep'
+              displayName: 'Publish to Marketplace'
+              inputs:
+                connectTo: 'VsTeam'
+                connectedServiceName: '$(marketplaceConnectionName)'
+                fileType: 'vsix'
+                vsixFile: '$(Pipeline.Workspace)/vsix/$(extensionFileName)'
+                publisherId: '$(publisher)'
+                extensionId: '$(extensionId)'
+                extensionName: '$(extensionName)$(Publish.extensionNameSuffix)'
+                extensionTag: '$(Publish.extensionTag)'
+                extensionVisibility: '$(Publish.extensionVisibility)'
+                updateTasksVersion: false
+                noWaitValidation: true
+                ${{ if ne(parameters.PublishEnvironment, 'Release' ) }}:
+                  shareWith: '$(shareWith)'
+
+            - task: PowerShell@2
+              displayName: 'Set extension file name'
+              inputs:
+                filePath: '$(Build.SourcesDirectory)/build/pipeline/set-extension-file-name.ps1'
+                workingDirectory: '$(Build.SourcesDirectory)'
+              env:
+                GENERATED_FILE_NAME: $(publishStep.Extension.OutputPath)
+
+            - task: IsAzureDevOpsExtensionValid@4
+              inputs:
+                connectTo: 'VsTeam'
+                connectedServiceName: '$(marketplaceConnectionName)'
+                method: 'vsix'
+                vsixFile: '$(ExtensionFileName)'
+
+            - task: PublishPipelineArtifact@1
+              displayName: 'Publish vsix'
+              inputs:
+                publishLocation: 'pipeline'
+                targetPath: '$(ExtensionFileName)'
+                artifact: 'marketplace'
+              condition: succeededOrFailed()
+
+            - ${{ if eq( parameters.PublishEnvironment, 'Release' ) }}:
+                - task: GitHubRelease@1
+                  displayName: 'GitHub Release Asset'
+                  inputs:
+                    gitHubConnection: '$(gitHubConnectionName)'
+                    repositoryName: '$(Build.Repository.Name)'
+                    action: 'edit'
+                    tag: '$(Build.SourceBranchName)'
+                    assets: '$(ExtensionFileName)'

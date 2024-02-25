@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "ES6",
+    "outDir": "package",
+    "module": "commonjs",
+    "sourceMap": true,
+    "incremental": true,
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": ["*.ts"],
+  "exclude": ["node_modules"]
+}

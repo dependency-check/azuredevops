@@ -1,0 +1,31 @@
+{
+  "name": "dependency-check-build-task.tests",
+  "version": "1.0.0",
+  "description": "Dependency Check Extension Task Tests",
+  "main": "dependency-check-build-task.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "mocha L0.js",
+    "test:clean": "npm run build && npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dependency-check/azuredevops.git"
+  },
+  "author": "Dependency Check",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/dependency-check/azuredevops/issues"
+  },
+  "homepage": "https://github.com/dependency-check/azuredevops",
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/mocha": "^10.0.6",
+    "azure-pipelines-task-lib": "^4.7.0",
+    "mocha": "^10.2.0",
+    "ts-node": "^10.9.2",
+    "assert": "^2.1.0",
+    "fs-extra": "^11.2.0",
+    "typescript": "^5.3.3"
+  }
+}
