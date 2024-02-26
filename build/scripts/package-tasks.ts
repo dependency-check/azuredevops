@@ -8,26 +8,7 @@ import common = require('./common');
 import AdmZip from 'adm-zip';
 import { AzureDevOpsTaskDef } from "./task";
 
-// common functions
-const run = common.runCommand;
-const pwd = common.pwd;
-const createResJson = common.createResJson;
-const generateTaskLoc = common.generateTaskLoc;
-
 const vstsFiles = ['task.json', 'task.loc.json', 'package.json', 'package-lock.json', 'icon.png', 'lib.json', 'Strings']
-
-function minifyTask(taskPath:string, taskTarget:string) {
-    const sourceRoot = pwd();
-    const webpackConfig = path.join(sourceRoot, 'build', 'scripts', 'webpack.config.ts');
-    let webpackCmd = 'webpack bundle'
-    webpackCmd += ' --mode production';
-    webpackCmd += ' --config ' + webpackConfig;
-    webpackCmd += ' --entry ' + path.join(taskPath, taskTarget);
-    webpackCmd += ' --output-filename ' + taskTarget;
-    webpackCmd += ' --output-path ' + taskPath;
-    webpackCmd += ' --no-color';
-    run(webpackCmd);
-}
 
 function updateExtension(extParams: {
     extensionPath: string;
@@ -60,19 +41,8 @@ function updateExtension(extParams: {
         const libJsonPath = path.join(taskPath, 'node_modules', 'azure-pipelines-task-lib', 'lib.json')
         fs.copyFileSync(libJsonPath, path.join(taskPath, 'lib.json'))
 
-        // Create resources.resjson
-        //createResJson(taskDef, taskPath);
-        // Generate task.loc.json
-        //generateTaskLoc(taskDef, taskPath);
-
-        // Minifying task
-        //minifyTask(taskPath, taskTarget);
-
         // Clean
         cleanTask(taskPath, taskTarget);
-
-        // safely re-populate the unpacked azure-pipelines-task-lib
-        //rePopulateTask(taskPath);
 
         // Update task.json
         if (semver.valid(extParams.extensionVersion)) {
@@ -91,12 +61,6 @@ function updateExtension(extParams: {
     const newExtension = new AdmZip();
     newExtension.addLocalFolder(tempVsix);
     newExtension.writeZip(extParams.extensionPath);
-}
-
-function rePopulateTask(taskPath:string) {
-    let npmCommand = 'npm install azure-pipelines-task-lib --omit=dev --no-save';
-    npmCommand += " --prefix " + taskPath;
-    run(npmCommand);
 }
 
 function cleanTask(taskPath:string, taskTarget:string) {

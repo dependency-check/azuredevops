@@ -15,3 +15,5 @@
 **/*.LEGAL.txt
 **/*.zip
 **/resources.resjson
+
+!.eslintrc.js

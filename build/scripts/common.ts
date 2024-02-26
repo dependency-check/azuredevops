@@ -199,28 +199,6 @@ export async function bundleTask(taskFolder:string) {
     }
 }
 
-export function bundleTask2(taskFolder:string) {
-    let packageDef = JSON.parse(fs.readFileSync(path.join(taskFolder, 'package.json'), 'utf-8'));
-    const mainPath = path.join(taskFolder, packageDef.main);
-    const result: esbuild.BuildResult = esbuild.buildSync({
-        entryPoints: [mainPath],
-        bundle: true,
-        platform: 'node',
-        target: ['node10'],
-        minify: true,
-        outfile: mainPath,
-        allowOverwrite: true,
-        legalComments: 'external',
-        external: ['azure-pipelines-task-lib']
-    });
-    result.warnings.forEach((warning: esbuild.Message) => console.warn(warning.text));
-
-    if(result.errors.length > 0) {
-        result.errors.forEach((error: esbuild.Message) => console.error(error.text));
-        throw "Error on build task";
-    }
-}
-
 /**
  * A writable stream intended to be used with Tfx when using JSON output.
  * This class overcomes the problem of having tfx warnings being displayed
