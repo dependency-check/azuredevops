@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES6",
+    "sourceMap": true,
+    "alwaysStrict": true,
+    "esModuleInterop": true,
+    "typeRoots": ["./node_modules/@types", "../definitions"]
+  },
+  "exclude": ["node_modules"]
+}

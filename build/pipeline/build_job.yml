@@ -1,0 +1,37 @@
+jobs:
+  - job: 'buildJob'
+    displayName: 'Build'
+    steps:
+      - checkout: self
+        displayName: 'Checkout project repository'
+        clean: False
+        fetchDepth: 0
+        fetchTags: True
+
+      - task: PowerShell@2
+        displayName: 'Set Build Number'
+        inputs:
+          filePath: '$(Build.SourcesDirectory)/build/pipeline/set-build-number.ps1'
+          workingDirectory: '$(Build.SourcesDirectory)'
+        env:
+          BUILD_REASON: $(Build.Reason)
+          BUILD_SOURCE_BRANCH: $(Build.SourceBranch)
+          BUILD_SOURCE_BRANCH_NAME: $(Build.SourceBranchName)
+
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '18.x'
+        displayName: 'Install Node.js'
+
+      - task: Npm@1
+        displayName: 'Build extension'
+        inputs:
+          command: 'custom'
+          customCommand: run package -- -- --outputPath "$(Build.ArtifactStagingDirectory)/$(extensionFileName)" --publisher "$(publisher)" --extensionName $(extensionName) --extensionVersion "$(Build.SourceBranchName)"
+
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish artifact'
+        inputs:
+          publishLocation: 'pipeline'
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifact: 'vsix'

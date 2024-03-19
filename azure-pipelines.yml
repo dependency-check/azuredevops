@@ -1,0 +1,35 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - refs/heads/feature/*
+      - refs/heads/hotfix/*
+      - refs/tags/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: DependencyCheck-AzureDevOps-Dev
+  - name: CurrentDate
+    value: $[ format('{0:yyyy}{0:MM}{0:dd}', pipeline.startTime) ]
+  - name: PublishEnvironment
+    ${{ if startsWith( variables['Build.SourceBranch'], 'refs/tags/' ) }}:
+      value: 'Release'
+    ${{ if startsWith( variables['Build.SourceBranch'], 'refs/heads/feature/' ) }}:
+      value: 'Development'
+    ${{ if startsWith( variables['Build.SourceBranch'], 'refs/heads/hotfix/' ) }}:
+      value: 'Hotfix'
+
+stages:
+  - stage: 'buildStage'
+    displayName: 'Build'
+    jobs:
+      - template: build/pipeline/build_job.yml
+  - stage: 'publishStage'
+    dependsOn: 'buildStage'
+    displayName: 'Publish'
+    jobs:
+      - template: build/pipeline/publish_job.yml
+        parameters:
+          PublishEnvironment: ${{ variables.PublishEnvironment }}

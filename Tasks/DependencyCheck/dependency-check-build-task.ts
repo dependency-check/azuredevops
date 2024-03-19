@@ -1,55 +1,59 @@
 import tl = require('azure-pipelines-task-lib/task');
 import httpClient = require('typed-rest-client/HttpClient');
 import fs = require('fs');
-import url = require("url");
-import path = require("path");
-import DecompressZip = require('decompress-zip');
+import url = require('url');
+import path = require('path');
+import decompress from 'decompress';
+import { IHttpClientResponse } from 'typed-rest-client/Interfaces';
 
 const client = new httpClient.HttpClient('DC_AGENT');
 const releaseApi = 'https://api.github.com/repos/jeremylong/DependencyCheck/releases';
 
-// Install prerequisites : https://docs.microsoft.com/en-us/azure/devops/extend/develop/add-build-task?view=azure-devops#prerequisites
-// To test locally Run:
-// cd ./Tasks/dependency-check-build-task/
-// npm install
-// npm run build
-// node dependency-check-build-task.js
-
 async function run() {
     console.log("Starting Dependency Check...")
+    let enableVerbose: boolean = true;
+    let logFile: string = "";
     try {
         // Get inputs from build task.
-        let projectName: string | undefined = tl.getInput('projectName', true);
-        let scanPath: string | undefined = tl.getPathInput('scanPath', true);
+        enableVerbose = tl.getBoolInput('enableVerbose', true);
+
+        let projectName: string = tl.getInput('projectName', true);
+        let scanPath: string = tl.getPathInput('scanPath', true);
         let excludePath: string | undefined = tl.getPathInput('excludePath');
-        let format: string | undefined = tl.getInput('format', true);
-        let failOnCVSS: string | undefined = tl.getInput('failOnCVSS');
+        let format: string = tl.getInput('format', true);
         let suppressionPath: string | undefined = tl.getPathInput('suppressionPath');
         let reportsDirectory: string | undefined = tl.getPathInput('reportsDirectory');
-        let warnOnCVSSViolation: boolean | undefined = tl.getBoolInput('warnOnCVSSViolation', true);
         let reportFilename: string | undefined = tl.getPathInput('reportFilename');
-        let enableExperimental: boolean | undefined = tl.getBoolInput('enableExperimental', true);
-        let enableRetired: boolean | undefined = tl.getBoolInput('enableRetired', true);
-        let enableVerbose: boolean | undefined = tl.getBoolInput('enableVerbose', true);
         let localInstallPath: string | undefined = tl.getPathInput('localInstallPath');
-        let dependencyCheckVersion: string | undefined = tl.getInput('dependencyCheckVersion') || 'latest';
-        let dataMirror: string | undefined = tl.getInput('dataMirror');
-        let customRepo: string | undefined = tl.getInput('customRepo');
         let additionalArguments: string | undefined = tl.getInput('additionalArguments');
+        let nvdApiKey: string | undefined = tl.getInput('nvdApiKey');
         let hasLocalInstallation = true;
 
-        // Trim the strings
-        projectName = projectName?.trim()
-        scanPath = scanPath?.trim();
-        excludePath = excludePath?.trim();
-        suppressionPath = suppressionPath?.trim();
-        reportsDirectory = reportsDirectory?.trim();
-        reportFilename = reportFilename?.trim();
-        additionalArguments = additionalArguments?.trim();
-        localInstallPath = localInstallPath?.trim();
+        const enableExperimental: boolean = tl.getBoolInput('enableExperimental', true);
+        const enableRetired: boolean = tl.getBoolInput('enableRetired', true);
+        const uploadReports: boolean = tl.getBoolInput('uploadReports', true);
+        const uploadSARIFReport: boolean = tl.getBoolInput('uploadSARIFReport', false);
+        const warnOnCVSSViolation: boolean = tl.getBoolInput('warnOnCVSSViolation', true);
+        const failOnCVSS: string | undefined = tl.getInput('failOnCVSS');
+        const dependencyCheckVersion: string | undefined = tl.getInput('dependencyCheckVersion') || 'latest';
+        const dataMirror: string | undefined = tl.getInput('dataMirror');
+        const customRepo: string | undefined = tl.getInput('customRepo');
 
-        let sourcesDirectory = tl.getVariable('Build.SourcesDirectory');
-        let testDirectory = tl.getVariable('Common.TestResultsDirectory');
+        // Trim the strings
+        projectName = projectName.trim();
+        scanPath = scanPath.trim();
+        format = format.trim();
+
+        if (excludePath !== undefined) excludePath = excludePath.trim();
+        if (suppressionPath !== undefined) suppressionPath = suppressionPath.trim();
+        if (reportsDirectory !== undefined) reportsDirectory = reportsDirectory.trim();
+        if (reportFilename !== undefined) reportFilename = reportFilename.trim();
+        if (additionalArguments !== undefined) additionalArguments = additionalArguments.trim();
+        if (localInstallPath !== undefined) localInstallPath = localInstallPath.trim();
+        if (nvdApiKey !== undefined) nvdApiKey = nvdApiKey.trim();
+
+        const sourcesDirectory = tl.getVariable('Build.SourcesDirectory');
+        const testDirectory = tl.getVariable('Common.TestResultsDirectory');
 
         // Set reports directory (if necessary)
         if (reportsDirectory == sourcesDirectory)
@@ -57,17 +61,17 @@ async function run() {
         console.log(`Setting report directory to ${reportsDirectory}`);
 
         // Set logs file
-        let logFile = tl.resolve(reportsDirectory, 'log');
+        logFile = tl.resolve(reportsDirectory, 'log');
 
         // Create report directory (if necessary)
-        if (!tl.exist(reportsDirectory!)) {
+        if (!tl.exist(reportsDirectory)) {
             console.log(`Creating report directory at ${reportsDirectory}`);
-            tl.mkdirP(reportsDirectory!);
+            tl.mkdirP(reportsDirectory);
         }
 
         // Set output folder (and filename if supplied)
         let outField: string = reportsDirectory;
-        if (reportFilename && format?.split(',')?.length === 1 && format != "ALL") {
+        if (reportFilename && format !== undefined && format.split(',').length === 1 && format != "ALL") {
             outField = tl.resolve(reportsDirectory, reportFilename);
         }
 
@@ -75,7 +79,7 @@ async function run() {
         let args = `--project "${projectName}" --out "${outField}"`;
 
         // Scan paths
-        let paths = scanPath?.split(',');
+        const paths = scanPath?.split(',');
         paths?.forEach(path => {
             args += ` --scan "${path}"`;
         });
@@ -85,7 +89,7 @@ async function run() {
             args += ` --exclude "${excludePath}"`;
 
         // Format types
-        let outputTypes = format?.split(',');
+        const outputTypes = format?.split(',');
         outputTypes?.forEach(outputType => {
             args += ` --format ${outputType}`;
         });
@@ -110,6 +114,10 @@ async function run() {
         if (enableVerbose)
             args += ` --log "${logFile}"`;
 
+        // Set the NVD API Key
+        if (nvdApiKey)
+            args += ` --nvdApiKey "${nvdApiKey}"`;
+
         // Set additionalArguments
         if (additionalArguments)
             args += ` ${additionalArguments}`;
@@ -119,14 +127,16 @@ async function run() {
             hasLocalInstallation = false;
             localInstallPath = tl.resolve('./dependency-check');
 
-            tl.checkPath(localInstallPath, 'Dependency Check installer');
+            if (!tl.exist(localInstallPath)) {
+                console.log(`Creating dependency check installer directory at ${localInstallPath}`);
+                tl.mkdirP(localInstallPath);
+            }
 
-            let zipUrl;
+            let zipUrl: string;
             if (customRepo) {
                 console.log(`Downloading Dependency Check installer from ${customRepo}...`);
                 zipUrl = customRepo;
-            }
-            else {
+            } else {
                 console.log(`Downloading Dependency Check ${dependencyCheckVersion} installer from GitHub..`);
                 zipUrl = await getZipUrl(dependencyCheckVersion);
             }
@@ -135,19 +145,24 @@ async function run() {
             await unzipFromUrl(zipUrl, tl.resolve('./'));
         }
 
-        // Get dependency check data dir path
-        let dataDirectory = tl.resolve(localInstallPath, 'data');
-
         // Pull cached data archive
-        if (dataMirror && tl.exist(dataDirectory)) {
+        if (dataMirror) {
+            // Get dependency check data dir path
+            const dataDirectory = tl.resolve(localInstallPath, 'data');
+
+            if (!tl.exist(dataDirectory)) {
+                console.log(`Creating dependency check data directory at ${dataDirectory}`);
+                tl.mkdirP(dataDirectory);
+            }
+
             console.log('Downloading Dependency Check data cache archive...');
             await unzipFromUrl(dataMirror, dataDirectory);
         }
 
         // Get dependency check script path (.sh file for Linux and Darwin OS)
         let depCheck = 'dependency-check.sh';
-        if (tl.osType().match(/^Windows/)) depCheck = 'dependency-check.bat';
-        let depCheckPath = tl.resolve(localInstallPath, 'bin', depCheck);
+        if (tl.getPlatform() == tl.Platform.Windows) depCheck = 'dependency-check.bat';
+        const depCheckPath = tl.resolve(localInstallPath, 'bin', depCheck);
         console.log(`Dependency Check script set to ${depCheckPath}`);
 
         tl.checkPath(depCheckPath, 'Dependency Check script');
@@ -155,7 +170,9 @@ async function run() {
         // Console output for the log file
         console.log('Invoking Dependency Check...');
         console.log(`Path: ${depCheckPath}`);
-        console.log(`Arguments: ${args}`);
+
+        const maskedArgs = maskArguments(args);
+        console.log(`Arguments: ${maskedArgs}`);
 
         // Set Java args
         const customJavaOpts = tl.getVariable('JAVA_OPTS');
@@ -166,89 +183,87 @@ async function run() {
         }
 
         // Version smoke test
-        await tl.tool(depCheckPath).arg('--version').exec();
+        await tl.tool(depCheckPath).arg('--version').execAsync();
 
-        if(!hasLocalInstallation) {
+        if (!hasLocalInstallation) {
             // Remove lock files from potential previous canceled run if no local/centralized installation of tool is used.
             // We need this because due to a bug the dependency check tool is currently leaving .lock files around if you cancel at the wrong moment.
-            // Since a per-agent installation shouldn't be able to run two scans parallel, we can savely remove all lock files still lying around.
+            // Since a per-agent installation shouldn't be able to run two scans parallel, we can safely remove all lock files still lying around.
             console.log('Searching for left over lock files...');
-            let lockFiles = tl.findMatch(localInstallPath, '*.lock', null, { matchBase: true });
-            if(lockFiles.length > 0) {
+            const lockFiles = tl.findMatch(localInstallPath, '*.lock', null, {matchBase: true});
+            if (lockFiles.length > 0) {
                 console.log('found ' + lockFiles.length + ' left over lock files, removing them now...');
                 lockFiles.forEach(lockfile => {
-                    let fullLockFilePath = tl.resolve(lockfile);
+                    const fullLockFilePath = tl.resolve(lockfile);
                     try {
-                        if(tl.exist(fullLockFilePath)) {
+                        if (tl.exist(fullLockFilePath)) {
                             console.log('removing lock file "' + fullLockFilePath + '"...');
                             tl.rmRF(fullLockFilePath);
-                        }
-                        else {
+                        } else {
                             console.log('found lock file "' + fullLockFilePath + '" doesn\'t exist, that was unexpected');
                         }
-                    }
-                    catch (err) {
+                    } catch (err) {
                         console.log('could not delete lock file "' + fullLockFilePath + '"!');
                         console.error(err);
                     }
                 });
-            }
-            else {
+            } else {
                 console.log('found no left over lock files, continuing...');
             }
         }
 
         // Run the scan
-        let exitCode = await tl.tool(depCheckPath).line(args).exec({ failOnStdErr: false, ignoreReturnCode: true });
+        const exitCode = await tl.tool(depCheckPath).line(args).execAsync({ failOnStdErr: false, ignoreReturnCode: true });
         console.log(`Dependency Check completed with exit code ${exitCode}.`);
         console.log('Dependency Check reports:');
         console.log(tl.findMatch(reportsDirectory, '**/*.*'));
 
         // Process based on exit code
-        let failed = exitCode != 0;
-        let isViolation = exitCode == (dependencyCheckVersion.match(/^[0-7]\./) ? 1 : 15);
+        const failed = exitCode != 0;
+        const isViolation = exitCode == (dependencyCheckVersion.match(/^[0-7]\./) ? 1 : 15);
 
         // Process scan artifacts is required
-        let processArtifacts = !failed || isViolation;
+        const processArtifacts = ((!failed || isViolation) && uploadReports);
         if (processArtifacts) {
-            logDebug('Attachments:');
-            let reports = tl.findMatch(reportsDirectory, '**/*.*');
+            console.log(`##[group]Attachments`);
+            tl.debug('Attachments:');
+            const reports = tl.findMatch(reportsDirectory, '**/*.*');
             reports.forEach(filePath => {
-                let fileName = path.basename(filePath).replace('.', '%2E');
-                let fileExt = path.extname(filePath);
-                logDebug(`Attachment name: ${fileName}`);
-                logDebug(`Attachment path: ${filePath}`);
-                logDebug(`Attachment type: ${fileExt}`); 
-                console.log(`##vso[task.addattachment type=dependencycheck-artifact;name=${fileName};]${filePath}`);
-                console.log(`##vso[artifact.upload containerfolder=dependency-check;artifactname=Dependency Check;]${filePath}`);
-            })
+                const fileName = path.basename(filePath).replace('.', '%2E');
+                const fileExtension = path.extname(filePath);
+                tl.debug(`Attachment name: ${fileName}`);
+                tl.debug(`Attachment path: ${filePath}`);
+                tl.debug(`Attachment type: ${fileExtension}`);
+                tl.addAttachment('dependencycheck-artifact', fileName, filePath);
+                tl.uploadArtifact('dependency-check', filePath, 'Dependency Check')
 
-            // Upload logs
-            if (enableVerbose)
-                console.log(`##vso[build.uploadlog]${logFile}`);
+                if (uploadSARIFReport && fileExtension.toLowerCase() === '.sarif') {
+                    tl.debug(`Uploaded SARIF attachment: ${filePath}`);
+                    tl.uploadArtifact('OWASPDependencyCheck', filePath, 'CodeAnalysisLogs')
+                }
+            })
+            console.log(`##[endgroup]`);
         }
 
         let message = "Dependency Check succeeded"
         let result = tl.TaskResult.Succeeded
         if (failed) {
-            if(isViolation) {
+            if (isViolation) {
                 message = "CVSS threshold violation.";
 
-                if(warnOnCVSSViolation) {
+                if (warnOnCVSSViolation) {
                     result = tl.TaskResult.SucceededWithIssues
-                }
-                else {
+                } else {
                     result = tl.TaskResult.Failed
                 }
-            }
-            else {
+            } else {
                 message = "Dependency Check exited with an error code (exit code: " + exitCode + ")."
                 result = tl.TaskResult.Failed
             }
         }
 
         let consoleMessage = 'Dependency Check ';
-        switch(result) {
+        switch (result) {
             case tl.TaskResult.Succeeded:
                 consoleMessage += 'succeeded'
                 break;
@@ -263,105 +278,105 @@ async function run() {
         console.log(consoleMessage);
 
         tl.setResult(result, message);
-    }
-    catch (err) {
-        console.log(err.message);
-        tl.error(err.message);
+    } catch (err) {
+        if (err instanceof Error) {
+            console.log(err.message);
+            tl.error(err.message);
+        }
         tl.setResult(tl.TaskResult.Failed, 'Unhandled error condition detected.');
+    } finally {
+        // Upload logs
+        if (enableVerbose && logFile !== "" && tl.exist(logFile))
+            tl.uploadBuildLog(logFile);
     }
 
     console.log("Ending Dependency Check...");
 }
 
-function logDebug(message: string) {
-    if(message !== null) {
-        let varSystemDebug = tl.getVariable('system.debug');
-
-        if(typeof varSystemDebug === 'string') {
-            if(varSystemDebug.toLowerCase() == 'true') {
-                console.log('##[debug]' + message)
-            }
-        }    
-    }
-}
-
 function cleanLocalInstallPath(localInstallPath: string) {
-    let files = tl.findMatch(localInstallPath, ['**', '!data', '!data/**']);
+    const files = tl.findMatch(localInstallPath, ['**', '!data', '!data/**']);
     files.forEach(file => tl.rmRF(file));
 }
 
-async function getZipUrl(version: string): Promise<void> {
+async function getZipUrl(version: string): Promise<string> {
     let url = `${releaseApi}/tags/v${version}`;
     if (version == 'latest') url = `${releaseApi}/${version}`;
 
-    let response = await client.get(url);
-    let releaseInfo = JSON.parse(await response.readBody());
-    let asset = releaseInfo['assets'].find(asset => asset['content_type'] == 'application/zip');
+    const response = await client.get(url);
+    const releaseInfo = JSON.parse(await response.readBody());
+    const asset = releaseInfo['assets'].find((asset: {
+        [x: string]: string;
+    }) => asset['content_type'] == 'application/zip');
 
-    return asset['browser_download_url'];
+    return asset['browser_download_url'] as string;
+}
+
+function maskArguments(args: string): string {
+    const argumentsName = ['nvdApiKey', 'nvdPassword', 'retirejsPassword', 'ossIndexPassword', 'artifactoryApiToken', 'artifactoryBearerToken', 'nexusPass', 'dbPassword']
+    let maskedArguments = args;
+    argumentsName.forEach((argumentName) => {
+        const pattern = new RegExp(`(--${argumentName}\\s+)(["']?.+?["']?)(?=\\s+--|$)`, 'gi');
+        maskedArguments = maskedArguments.replace(pattern, '$1***');
+    });
+    return maskedArguments;
 }
 
 async function unzipFromUrl(zipUrl: string, unzipLocation: string): Promise<void> {
-    let fileName = path.basename(url.parse(zipUrl).pathname);
-    let zipLocation = tl.resolve(fileName)
+    const fileName = path.basename(url.parse(zipUrl).pathname);
+    const zipLocation = tl.resolve(fileName)
     let tmpError = null;
-    let response = null;
+    let response: IHttpClientResponse = null;
     let downloadErrorRetries = 5;
-    
+
     do {
         tmpError = null;
         try {
-            await console.log('Downloading ZIP from "' + zipUrl + '"...');
+            console.log('Downloading ZIP from "' + zipUrl + '"...');
             response = await client.get(zipUrl);
-            await logDebug('done downloading');
+            tl.debug('done downloading');
         }
         catch(error) {
             tmpError = error;
             downloadErrorRetries--;
-            await console.error('Error trying to download ZIP (' + (downloadErrorRetries+1) + ' tries left)');
-            await console.error(error);
+            console.error('Error trying to download ZIP (' + (downloadErrorRetries+1) + ' tries left)');
+            console.error(error);
         }
     }
     while(tmpError !== null && downloadErrorRetries >= 0);
-    
+
     if(tmpError !== null) {
         throw tmpError;
     }
 
-    await logDebug('Download was successful, saving downloaded ZIP file...');
+    tl.debug('Download was successful, saving downloaded ZIP file...');
 
     await new Promise<void>(function (resolve, reject) {
-        let writer = fs.createWriteStream(zipLocation);
+        const writer = fs.createWriteStream(zipLocation);
         writer.on('error', err => reject(err));
-        writer.on('finish', log => resolve());
+        writer.on('finish', () => resolve());
         response.message.pipe(writer);
     });
 
-    await logDebug('Downloaded ZIP file has been saved, unzipping now...');
+    tl.debug('Downloaded ZIP file has been saved, unzipping now...');
 
     await unzipFromFile(zipLocation, unzipLocation);
 
-    await logDebug('Unzipping complete, removing ZIP file now...');
+    tl.debug('Unzipping complete, removing ZIP file now...');
 
     tl.rmRF(zipLocation);
 
-    await logDebug('ZIP file has been removed');
+    tl.debug('ZIP file has been removed');
 }
 
 async function unzipFromFile(zipLocation: string, unzipLocation: string): Promise<void> {
     await new Promise<void>(function (resolve, reject) {
         tl.debug('Extracting ' + zipLocation + ' to ' + unzipLocation);
 
-        var unzipper = new DecompressZip(zipLocation);
-        unzipper.on('error', err => reject(err));
-        unzipper.on('extract', log => {
+        decompress(zipLocation, unzipLocation).then(() => {
             tl.debug('Extracted ' + zipLocation + ' to ' + unzipLocation + ' successfully');
             return resolve();
-        });
-        unzipper.extract({
-            path: unzipLocation
-        });
+        }).catch((err: any) => reject(err));
     });
 }
 
-run();
+void run();
