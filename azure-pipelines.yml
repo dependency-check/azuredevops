@@ -10,7 +10,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: DependencyCheck-AzureDevOps-Dev
+  - group: DependencyCheck-AzureDevOps
   - name: CurrentDate
     value: $[ format('{0:yyyy}{0:MM}{0:dd}', pipeline.startTime) ]
   - name: PublishEnvironment
