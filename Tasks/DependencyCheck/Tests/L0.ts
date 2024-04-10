@@ -1,13 +1,13 @@
-import fs = require('fs-extra')
-import assert = require('assert');
-import path = require('path');
 import * as ttm from 'azure-pipelines-task-lib/mock-test';
+import * as path from 'path';
+import * as fs from 'fs-extra';
 import * as Mocha from 'mocha';
+import assert from 'assert';
 
 describe('DependencyCheck Suite', function () {
     this.timeout(parseInt(process.env.TASK_TEST_TIMEOUT) || 20000);
 
-    before(() => {
+    before((done) => {
         const dataPath = path.join(__dirname, "data");
         const dcPath = path.join(dataPath, "dependency-check");
         const logPath = path.join(dcPath, "log");
@@ -27,7 +27,7 @@ describe('DependencyCheck Suite', function () {
         process.env['BUILD_REPOSITORY_NAME'] = "MyRepo";
         process.env['BUILD_SOURCEBRANCHNAME'] = "master";
         process.env['BUILD_SOURCEVERSION'] = "122a24f";
-        process.env['BUILD_SOURCESDIRECTORY'] = __dirname;
+        //process.env['BUILD_SOURCESDIRECTORY'] = __dirname;
         process.env['BUILDCONFIGURATION'] = "Debug";
         process.env['BUILDPLATFORM'] = "Any CPU";
         process.env['SYSTEM_ACCESSTOKEN'] = "";
@@ -35,21 +35,27 @@ describe('DependencyCheck Suite', function () {
         process.env['SYSTEM_TEAMFOUNDATIONSERVERURI'] = "https://myurl.de/mycollection/";
         process.env['SYSTEM_TEAMPROJECT'] = "PSItraffic";
         process.env['COMMON_TESTRESULTSDIRECTORY'] = "data";
+
+        done();
     });
 
     after(() => {
     });
 
     it('Basic execution', (done: Mocha.Done) => {
-        let tp: string = path.join(__dirname, 'L0BasicExecution.js');
-        let tr: ttm.MockTestRunner = new ttm.MockTestRunner(tp);
+        this.timeout(1000);
 
-        tr.run();
+        const tp: string = path.join(__dirname, 'L0BasicExecution.js');
+        const tr: ttm.MockTestRunner = new ttm.MockTestRunner(tp);
 
-        assert(tr.invokedToolCount === 0, 'should not run anything');
-        assert(tr.stderr.length === 0, 'should not have written to stderr');
-        assert(tr.succeeded, 'task should have succeeded');
+        tr.runAsync().then(() => {
+            assert(tr.invokedToolCount === 0, 'should not run anything');
+            assert(tr.stderr.length === 0, 'should not have written to stderr');
+            assert(tr.succeeded, 'task should have succeeded');
 
-        done();
+            done();
+        }).catch((error) => {
+            done(error);
+        });
     });
 });

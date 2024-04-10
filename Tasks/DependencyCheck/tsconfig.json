@@ -4,5 +4,5 @@
     "outDir": "./",
     "sourceRoot": "./"
   },
-  "include": ["*.ts"]
+  "include": ["*.ts", "Tests/*.ts"]
 }

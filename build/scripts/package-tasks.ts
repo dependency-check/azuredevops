@@ -8,7 +8,7 @@ import common = require('./common');
 import AdmZip from 'adm-zip';
 import { AzureDevOpsTaskDef } from "./task";
 
-const vstsFiles = ['task.json', 'task.loc.json', 'package.json', 'package-lock.json', 'icon.png', 'lib.json', 'Strings']
+const vstsFiles = ['task.json', 'task.loc.json', 'package.json', 'package-lock.json', 'icon.png', 'lib.json', 'Strings', 'dependency-check']
 
 function updateExtension(extParams: {
     extensionPath: string;
