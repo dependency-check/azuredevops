@@ -26,6 +26,9 @@ variables:
       value: 'Development'
     ${{ if startsWith( variables['Build.SourceBranch'], 'refs/heads/hotfix/' ) }}:
       value: 'Hotfix'
+    ${{ else }}:
+      value: 'Development'
+
 
 stages:
   - stage: 'buildStage'
