@@ -127,10 +127,7 @@ async function run() {
             hasLocalInstallation = false;
             localInstallPath = tl.resolve('./dependency-check');
 
-            if (!tl.exist(localInstallPath)) {
-                console.log(`Creating dependency check installer directory at ${localInstallPath}`);
-                tl.mkdirP(localInstallPath);
-            }
+            tl.checkPath(localInstallPath, 'Dependency Check installer');
 
             let zipUrl: string;
             if (customRepo) {
