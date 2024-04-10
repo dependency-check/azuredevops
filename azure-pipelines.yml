@@ -22,9 +22,9 @@ variables:
   - name: PublishEnvironment
     ${{ if startsWith( variables['Build.SourceBranch'], 'refs/tags/' ) }}:
       value: 'Release'
-    ${{ else if startsWith( variables['Build.SourceBranch'], 'refs/heads/feature/' ) }}:
+    ${{ elseif startsWith( variables['Build.SourceBranch'], 'refs/heads/feature/' ) }}:
       value: 'Development'
-    ${{ else if startsWith( variables['Build.SourceBranch'], 'refs/heads/hotfix/' ) }}:
+    ${{ elseif startsWith( variables['Build.SourceBranch'], 'refs/heads/hotfix/' ) }}:
       value: 'Hotfix'
     ${{ else }}:
       value: 'Development'
