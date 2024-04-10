@@ -125,7 +125,7 @@ async function run() {
         // Set installation location
         if (localInstallPath == sourcesDirectory) {
             hasLocalInstallation = false;
-            localInstallPath = tl.resolve('./dependency-check');
+            localInstallPath = path.join(__dirname, 'dependency-check');
 
             tl.checkPath(localInstallPath, 'Dependency Check installer');
 
@@ -139,7 +139,7 @@ async function run() {
             }
 
             cleanLocalInstallPath(localInstallPath);
-            await unzipFromUrl(zipUrl, tl.resolve('./'));
+            await unzipFromUrl(zipUrl, localInstallPath);
         }
 
         // Pull cached data archive
