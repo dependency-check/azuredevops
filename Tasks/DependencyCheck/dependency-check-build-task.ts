@@ -139,7 +139,7 @@ async function run() {
             }
 
             cleanLocalInstallPath(localInstallPath);
-            await unzipFromUrl(zipUrl, localInstallPath);
+            await unzipFromUrl(zipUrl, tl.resolve('./'));
         }
 
         // Pull cached data archive
