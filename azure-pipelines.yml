@@ -6,11 +6,17 @@ trigger:
       - refs/heads/hotfix/*
       - refs/tags/*
 
+parameters:
+  - name: variable_group_name
+    displayName: Variable Group
+    type: string
+    default: 'DependencyCheck-AzureDevOps'
+
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: DependencyCheck-AzureDevOps
+  - group: ${{ parameters.variable_group_name }}
   - name: CurrentDate
     value: $[ format('{0:yyyy}{0:MM}{0:dd}', pipeline.startTime) ]
   - name: PublishEnvironment
@@ -20,6 +26,9 @@ variables:
       value: 'Development'
     ${{ if startsWith( variables['Build.SourceBranch'], 'refs/heads/hotfix/' ) }}:
       value: 'Hotfix'
+    ${{ else }}:
+      value: 'Development'
+
 
 stages:
   - stage: 'buildStage'

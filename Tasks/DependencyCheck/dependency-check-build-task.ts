@@ -1,7 +1,6 @@
 import tl = require('azure-pipelines-task-lib/task');
 import httpClient = require('typed-rest-client/HttpClient');
 import fs = require('fs');
-import url = require('url');
 import path = require('path');
 import decompress from 'decompress';
 import { IHttpClientResponse } from 'typed-rest-client/Interfaces';
@@ -125,7 +124,7 @@ async function run() {
         // Set installation location
         if (localInstallPath == sourcesDirectory) {
             hasLocalInstallation = false;
-            localInstallPath = tl.resolve('./dependency-check');
+            localInstallPath = path.join(__dirname, 'dependency-check');
 
             tl.checkPath(localInstallPath, 'Dependency Check installer');
 
@@ -139,7 +138,7 @@ async function run() {
             }
 
             cleanLocalInstallPath(localInstallPath);
-            await unzipFromUrl(zipUrl, tl.resolve('./'));
+            await unzipFromUrl(zipUrl, path.join(localInstallPath, '../'));
         }
 
         // Pull cached data archive
@@ -319,7 +318,7 @@ function maskArguments(args: string): string {
 }
 
 async function unzipFromUrl(zipUrl: string, unzipLocation: string): Promise<void> {
-    const fileName = path.basename(url.parse(zipUrl).pathname);
+    const fileName = path.basename(new URL(zipUrl).pathname);
     const zipLocation = tl.resolve(fileName)
     let tmpError = null;
     let response: IHttpClientResponse = null;
