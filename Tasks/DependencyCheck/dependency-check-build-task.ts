@@ -124,8 +124,6 @@ async function run() {
         // Set installation location
         if (localInstallPath == sourcesDirectory) {
             hasLocalInstallation = false;
-            localInstallPath = path.join(__dirname, 'dependency-check');
-
             tl.checkPath(localInstallPath, 'Dependency Check installer');
 
             let zipUrl: string;
