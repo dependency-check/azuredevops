@@ -51,7 +51,7 @@ async function run() {
         if (localInstallPath !== undefined) localInstallPath = localInstallPath.trim();
         if (nvdApiKey !== undefined) nvdApiKey = nvdApiKey.trim();
 
-        const sourcesDirectory = tl.getVariable('Build.SourcesDirectory');
+        const sourcesDirectory = tl.getVariable('Build.Repository.LocalPath');
         const testDirectory = tl.getVariable('Common.TestResultsDirectory');
 
         // Set reports directory (if necessary)
@@ -138,7 +138,7 @@ async function run() {
             }
 
             cleanLocalInstallPath(localInstallPath);
-            await unzipFromUrl(zipUrl, path.join(localInstallPath, '../'));
+            await unzipFromUrl(zipUrl, localInstallPath);
         }
 
         // Pull cached data archive
