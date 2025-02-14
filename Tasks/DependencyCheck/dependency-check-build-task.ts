@@ -137,6 +137,8 @@ async function run() {
 
             cleanLocalInstallPath(localInstallPath);
             await unzipFromUrl(zipUrl, localInstallPath);
+
+            localInstallPath = path.join(localInstallPath, 'dependency-check');
         }
 
         // Pull cached data archive
