@@ -71,10 +71,10 @@
       "uri": "https://github.com/dependency-check/azuredevops/issues"
     },
     "getstarted": {
-      "uri": "https://jeremylong.github.io/DependencyCheck/index.html"
+      "uri": "https://dependency-check.github.io/DependencyCheck/index.html"
     },
     "support": {
-      "uri": "https://github.com/jeremylong/DependencyCheck"
+      "uri": "https://github.com/dependency-check/DependencyCheck"
     }
   },
   "branding": {

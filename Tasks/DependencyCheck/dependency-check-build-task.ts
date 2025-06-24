@@ -6,7 +6,7 @@ import decompress from 'decompress';
 import { IHttpClientResponse } from 'typed-rest-client/Interfaces';
 
 const client = new httpClient.HttpClient('DC_AGENT');
-const releaseApi = 'https://api.github.com/repos/jeremylong/DependencyCheck/releases';
+const releaseApi = 'https://api.github.com/repos/dependency-check/DependencyCheck/releases';
 
 async function run() {
     console.log("Starting Dependency Check...")
