@@ -30,7 +30,7 @@ The extension maintainers do not monitor the Marketplace Question & Answers. Ple
 
     <img src="https://raw.githubusercontent.com/dependency-check/azuredevops/main/screenshots/buildtask-add.png">
 
-- Configure the build task with the appropriate [Dependency Check Command Line Arguments](https://jeremylong.github.io/DependencyCheck/dependency-check-cli/arguments.html).
+- Configure the build task with the appropriate [Dependency Check Command Line Arguments](https://dependency-check.github.io/DependencyCheck/dependency-check-cli/arguments.html).
 
     <img src="https://raw.githubusercontent.com/dependency-check/azuredevops/main/screenshots/buildtask-configure.png">
 
@@ -66,7 +66,7 @@ The extension maintainers do not monitor the Marketplace Question & Answers. Ple
 
 ## Learn More
 
-More details on configuring and running Dependency Check can be found at [https://jeremylong.github.io/DependencyCheck/](https://jeremylong.github.io/DependencyCheck/).
+More details on configuring and running Dependency Check can be found at [https://dependency-check.github.io/DependencyCheck/](https://dependency-check.github.io/DependencyCheck/).
 
 ## Supported Environments
 
