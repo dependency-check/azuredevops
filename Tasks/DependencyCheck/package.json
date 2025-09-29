@@ -6,7 +6,7 @@
   "author": "Dependency Check",
   "license": "Apache-2.0",
   "dependencies": {
-    "azure-pipelines-task-lib": "^4.10.1",
+    "azure-pipelines-task-lib": "^4.13.1",
     "decompress": "^4.2.1",
     "typed-rest-client": "^1.8.11"
   },
