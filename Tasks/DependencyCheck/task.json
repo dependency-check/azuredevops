@@ -199,15 +199,7 @@
       "target": "dependency-check-build-task.js",
       "argumentFormat": ""
     },
-    "Node18": {
-      "target": "dependency-check-build-task.js",
-      "argumentFormat": ""
-    },
     "Node20": {
-      "target": "dependency-check-build-task.js",
-      "argumentFormat": ""
-    },
-    "Node22": {
       "target": "dependency-check-build-task.js",
       "argumentFormat": ""
     }
