@@ -13,7 +13,7 @@
     "Patch": 0
   },
   "demands": [],
-  "minimumAgentVersion": "2.0.0",
+  "minimumAgentVersion": "2.144.0",
   "inputs": [
     {
       "name": "projectName",
@@ -196,6 +196,10 @@
       "argumentFormat": ""
     },
     "Node16": {
+      "target": "dependency-check-build-task.js",
+      "argumentFormat": ""
+    },
+    "Node20": {
       "target": "dependency-check-build-task.js",
       "argumentFormat": ""
     }
