@@ -51,7 +51,7 @@ async function run() {
         if (localInstallPath !== undefined) localInstallPath = localInstallPath.trim();
         if (nvdApiKey !== undefined) nvdApiKey = nvdApiKey.trim();
 
-        const sourcesDirectory = tl.getVariable('Build.SourcesDirectory');
+        const sourcesDirectory = tl.getVariable('Build.Repository.LocalPath');
         const testDirectory = tl.getVariable('Common.TestResultsDirectory');
 
         // Set reports directory (if necessary)
@@ -124,8 +124,6 @@ async function run() {
         // Set installation location
         if (localInstallPath == sourcesDirectory) {
             hasLocalInstallation = false;
-            localInstallPath = path.join(__dirname, 'dependency-check');
-
             tl.checkPath(localInstallPath, 'Dependency Check installer');
 
             let zipUrl: string;
@@ -138,7 +136,9 @@ async function run() {
             }
 
             cleanLocalInstallPath(localInstallPath);
-            await unzipFromUrl(zipUrl, path.join(localInstallPath, '../'));
+            await unzipFromUrl(zipUrl, localInstallPath);
+
+            localInstallPath = path.join(localInstallPath, 'dependency-check');
         }
 
         // Pull cached data archive
