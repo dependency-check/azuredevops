@@ -1,5 +1,7 @@
 # OWASP Dependency Check Azure DevOps Extension
 ![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/dependency-check.dependencycheck)
+![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/v/dependency-check.dependencycheck)
+
 
 Repository for the Azure DevOps extension wrapper around the OWASP Dependency Check CLI.
 
