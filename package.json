@@ -45,7 +45,7 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-no-null": "^1.0.2",
     "fs-extra": "^11.2.0",
-    "glob": "^10.3.10",
+    "glob": "^10.5.0",
     "semver": "^7.5.4",
     "shelljs": "^0.8.5",
     "terser-webpack-plugin": "^5.3.10",
