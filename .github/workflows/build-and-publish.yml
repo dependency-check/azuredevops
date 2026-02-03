@@ -58,6 +58,15 @@ jobs:
         id: version
         run: |
           COMMIT_COUNT=$(git rev-list --count HEAD)
+
+          # For pull requests, use a test version
+          if [[ "${{ github.ref }}" == refs/pull/* ]]; then
+            VERSION="1.0.0-pr${{ github.event.pull_request.number }}"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "Building PR version: $VERSION"
+            exit 0
+          fi
+
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           BRANCH_NAME="${BRANCH_NAME#refs/tags/}"
 
