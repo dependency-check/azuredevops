@@ -54,8 +54,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm run initdev
+      - name: Install dependencies and build
+        run: |
+          npm run initdev
+          npm run build
 
       - name: Get version from tag or branch
         id: version
