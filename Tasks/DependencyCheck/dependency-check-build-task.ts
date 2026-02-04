@@ -311,7 +311,9 @@ function maskArguments(args: string): string {
     const argumentsName = ['nvdApiKey', 'nvdPassword', 'retirejsPassword', 'ossIndexPassword', 'artifactoryApiToken', 'artifactoryBearerToken', 'nexusPass', 'dbPassword']
     let maskedArguments = args;
     argumentsName.forEach((argumentName) => {
-        const pattern = new RegExp(`(--${argumentName}\\s+)(["']?.+?["']?)(?=\\s+--|$)`, 'gi');
+        // Use string replacement with escaped special characters to avoid RegExp constructor with user input
+        const escapedArgumentName = argumentName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const pattern = new RegExp(`(--${escapedArgumentName}\\s+)(["']?.+?["']?)(?=\\s+--|$)`, 'gi');
         maskedArguments = maskedArguments.replace(pattern, '$1***');
     });
     return maskedArguments;
