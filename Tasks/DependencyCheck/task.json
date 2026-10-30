@@ -191,15 +191,11 @@
   ],
   "instanceNameFormat": "Dependency Check",
   "execution": {
-    "Node10": {
+    "Node20_1": {
       "target": "dependency-check-build-task.js",
       "argumentFormat": ""
     },
-    "Node16": {
-      "target": "dependency-check-build-task.js",
-      "argumentFormat": ""
-    },
-    "Node20": {
+    "Node24": {
       "target": "dependency-check-build-task.js",
       "argumentFormat": ""
     }
